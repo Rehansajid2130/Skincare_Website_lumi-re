@@ -1,0 +1,1008 @@
+// ponytail: comprehensive DTC skincare e-commerce admin portal with revenue analytics, inventory management, and storefront product editing
+import React, { useState, useRef, useMemo } from 'react';
+import {
+  TrendingUp,
+  DollarSign,
+  ShoppingBag,
+  Package,
+  Plus,
+  Trash2,
+  Edit3,
+  Check,
+  X,
+  Upload,
+  Eye,
+  ArrowLeft,
+  Truck,
+  Search,
+  Filter,
+  Sparkles,
+  CheckCircle,
+  AlertCircle,
+  Image as ImageIcon
+} from 'lucide-react';
+
+export default function AdminPortal({
+  products,
+  onAddProduct,
+  onUpdateProduct,
+  onDeleteProduct,
+  onNavigateToLanding,
+  onNavigateToProduct
+}) {
+  const [activeTab, setActiveTab] = useState('analytics'); // 'analytics' | 'products' | 'orders'
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
+
+  // Add / Edit Product Modal state
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [editingProductId, setEditingProductId] = useState(null);
+
+  // Form fields for product
+  const [formData, setFormData] = useState({
+    title: '',
+    subtitle: '',
+    category: 'Serums',
+    basePrice: 48,
+    compareAtPrice: 60,
+    costPerItem: 14,
+    stock: 250,
+    activeFormula: '',
+    description: '',
+    howToUse: '',
+    image: null
+  });
+
+  const fileInputRef = useRef(null);
+  const [imageError, setImageError] = useState(false);
+
+  // Toast feedback
+  const [toastMsg, setToastMsg] = useState(null);
+  const showToast = (msg) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 3500);
+  };
+
+  // Mock Orders Data
+  const [orders, setOrders] = useState([
+    {
+      id: 'ORD-2939993',
+      customer: 'Alex Smith',
+      email: 'alexsmith@gmail.com',
+      date: 'Sep 12, 2026',
+      items: 'Custom Anti-Aging Serum (x1), Goodnight Wrinkle Cream (x1)',
+      total: 72.00,
+      payment: 'Apple Pay',
+      status: 'Shipped'
+    },
+    {
+      id: 'ORD-2939942',
+      customer: 'Elena Rostova',
+      email: 'elena.rostova@icloud.com',
+      date: 'Sep 12, 2026',
+      items: 'Daily Mineral Shield SPF 30 (x2)',
+      total: 44.00,
+      payment: 'Visa •••• 8821',
+      status: 'Processing'
+    },
+    {
+      id: 'ORD-2939901',
+      customer: 'Marcus Chen',
+      email: 'm.chen@outlook.com',
+      date: 'Sep 11, 2026',
+      items: 'Gentle Squalane Cleanser (x1), Custom Anti-Aging Serum (x1)',
+      total: 66.00,
+      payment: 'Mastercard •••• 3192',
+      status: 'Delivered'
+    },
+    {
+      id: 'ORD-2939874',
+      customer: 'Sarah Miller',
+      email: 'sarah.m@gmail.com',
+      date: 'Sep 11, 2026',
+      items: 'Overnight Intensive Cream (x1)',
+      total: 24.00,
+      payment: 'Apple Pay',
+      status: 'Delivered'
+    },
+    {
+      id: 'ORD-2939810',
+      customer: 'David Kim',
+      email: 'david.kim@yahoo.com',
+      date: 'Sep 10, 2026',
+      items: 'Custom Anti-Aging Serum (x2)',
+      total: 96.00,
+      payment: 'Visa •••• 4242',
+      status: 'Delivered'
+    }
+  ]);
+
+  // Handle image upload directly via FileReader
+  const handleImageFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // ponytail: enforce max 1.5MB to prevent exhausting browser localStorage quota
+    if (file.size > 1.5 * 1024 * 1024) {
+      showToast('Image exceeds 1.5MB. Please upload an optimized PNG to preserve storage.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (uploadEvent) => {
+      const dataUrl = uploadEvent.target.result;
+      setFormData(prev => ({ ...prev, image: dataUrl }));
+      setImageError(false);
+      showToast('Product image uploaded successfully');
+    };
+    reader.onerror = () => {
+      showToast('Failed to read image file');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Open modal for new product
+  const handleOpenAddProduct = () => {
+    setEditingProductId(null);
+    setImageError(false);
+    setFormData({
+      title: '',
+      subtitle: '',
+      category: 'Skincare',
+      basePrice: 48,
+      compareAtPrice: 60,
+      costPerItem: 14,
+      stock: 250,
+      activeFormula: '',
+      description: '',
+      howToUse: '',
+      image: null
+    });
+    setIsProductModalOpen(true);
+  };
+
+  // Open modal for editing product
+  const handleOpenEditProduct = (prod) => {
+    setEditingProductId(prod.id);
+    setImageError(false);
+    setFormData({
+      title: prod.title || '',
+      subtitle: prod.subtitle || '',
+      category: prod.category || 'Serums',
+      basePrice: prod.basePrice || 48,
+      compareAtPrice: prod.compareAtPrice || Math.round((prod.basePrice || 48) * 1.25),
+      costPerItem: prod.costPerItem || 14,
+      stock: prod.stock || 250,
+      activeFormula: prod.activeFormula || '',
+      description: prod.description || '',
+      howToUse: prod.howToUse || '',
+      image: prod.image || null
+    });
+    setIsProductModalOpen(true);
+  };
+
+  // Save product to catalog
+  const handleSaveProduct = (e) => {
+    e.preventDefault();
+    if (!formData.title.trim()) {
+      showToast('Please enter a product title');
+      return;
+    }
+
+    if (!formData.image) {
+      setImageError(true);
+      showToast('Product image is required before publishing');
+      return;
+    }
+
+    const priceNum = parseFloat(formData.basePrice) || 0;
+    const compareNum = parseFloat(formData.compareAtPrice) || priceNum;
+    const costNum = parseFloat(formData.costPerItem) || 0;
+
+    // ponytail: preserve existing product metadata (variants, clinical data, highlights, cutoutImage) on update
+    const existingProduct = editingProductId ? products.find(p => p.id === editingProductId) : null;
+
+    const productPayload = {
+      ...(existingProduct || {}),
+      ...formData,
+      id: editingProductId || formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      basePrice: priceNum,
+      compareAtPrice: compareNum,
+      costPerItem: costNum,
+      stock: parseInt(formData.stock, 10) || 100,
+      variants: existingProduct?.variants || [
+        { size: 'standard', label: 'Standard Size', price: priceNum, savings: null }
+      ],
+      rating: existingProduct?.rating || 4.9,
+      reviewCount: existingProduct?.reviewCount || 42,
+      inStock: true,
+      shipsIn: existingProduct?.shipsIn || 'Same-day Dispatch • Free 2-Day Air'
+    };
+
+    if (editingProductId) {
+      onUpdateProduct(productPayload);
+      showToast(`Updated "${productPayload.title}" in store catalog`);
+    } else {
+      onAddProduct(productPayload);
+      showToast(`Added "${productPayload.title}" to store catalog`);
+    }
+
+    setIsProductModalOpen(false);
+  };
+
+  // Inline price update
+  const handleQuickPriceChange = (prodId, newPrice) => {
+    const val = parseFloat(newPrice);
+    if (isNaN(val) || val <= 0) return;
+    const existing = products.find(p => p.id === prodId);
+    if (existing) {
+      onUpdateProduct({ ...existing, basePrice: val });
+      showToast(`Price updated to $${val.toFixed(2)}`);
+    }
+  };
+
+  // Toggle order status
+  const handleToggleOrderStatus = (orderId) => {
+    setOrders(prev => prev.map(ord => {
+      if (ord.id === orderId) {
+        let nextStatus = 'Processing';
+        if (ord.status === 'Processing') nextStatus = 'Shipped';
+        else if (ord.status === 'Shipped') nextStatus = 'Delivered';
+        else if (ord.status === 'Delivered') nextStatus = 'Processing';
+        return { ...ord, status: nextStatus };
+      }
+      return ord;
+    }));
+    showToast(`Order status updated`);
+  };
+
+  // Dynamically extract all unique categories present in the products catalog
+  const availableCategories = useMemo(() => {
+    const cats = new Set(['All', 'Skincare']);
+    products.forEach(p => {
+      if (p.category && p.category.trim()) {
+        cats.add(p.category.trim());
+      }
+    });
+    return Array.from(cats);
+  }, [products]);
+
+  // Filtered products list matching search query across title, subtitle, category & active formula
+  const filteredProducts = products.filter(p => {
+    const prodCat = (p.category && p.category.trim()) || 'Skincare';
+    const query = searchQuery.toLowerCase().trim();
+
+    const matchesSearch = !query ||
+      (p.title && p.title.toLowerCase().includes(query)) ||
+      (p.subtitle && p.subtitle.toLowerCase().includes(query)) ||
+      prodCat.toLowerCase().includes(query) ||
+      (p.activeFormula && p.activeFormula.toLowerCase().includes(query));
+
+    const matchesCategory = selectedCategory === 'All' ||
+      prodCat.toLowerCase() === selectedCategory.toLowerCase();
+
+    return matchesSearch && matchesCategory;
+  });
+
+  // Revenue calculation metrics
+  const totalRevenue = 148920;
+  const totalCost = 50633;
+  const netProfit = totalRevenue - totalCost;
+  const profitMarginPercent = Math.round((netProfit / totalRevenue) * 100);
+
+  return (
+    <div className="hims-admin-wrapper">
+      {/* Toast Notification */}
+      {toastMsg && (
+        <div className="hims-admin-toast">
+          <Check size={16} strokeWidth={2.5} />
+          <span>{toastMsg}</span>
+        </div>
+      )}
+
+      {/* Admin Top Header */}
+      <header className="hims-admin-header">
+        <div className="hims-admin-header-inner">
+          <div className="hims-admin-brand-col">
+            <button
+              type="button"
+              className="hims-admin-back-btn"
+              onClick={onNavigateToLanding}
+              aria-label="Back to storefront"
+            >
+              <ArrowLeft size={16} />
+              <span>Back to Store</span>
+            </button>
+            <div className="hims-admin-brand-title">
+              lumière <span>Commerce Admin</span>
+            </div>
+            <span className="hims-admin-live-badge">
+              <span className="dot" /> Store Live
+            </span>
+          </div>
+
+          <div className="hims-admin-header-actions">
+            <button
+              type="button"
+              className="hims-btn-black hims-admin-new-prod-btn"
+              onClick={handleOpenAddProduct}
+            >
+              <Plus size={16} />
+              <span>Add New Product</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Admin Navigation Tabs */}
+      <div className="hims-admin-tabs-bar">
+        <div className="hims-admin-tabs-inner">
+          <button
+            type="button"
+            className={`admin-tab-btn ${activeTab === 'analytics' ? 'active' : ''}`}
+            onClick={() => setActiveTab('analytics')}
+          >
+            <TrendingUp size={17} />
+            <span>Revenue & Analytics</span>
+          </button>
+          <button
+            type="button"
+            className={`admin-tab-btn ${activeTab === 'products' ? 'active' : ''}`}
+            onClick={() => setActiveTab('products')}
+          >
+            <Package size={17} />
+            <span>Product Catalog & Pricing ({products.length})</span>
+          </button>
+          <button
+            type="button"
+            className={`admin-tab-btn ${activeTab === 'orders' ? 'active' : ''}`}
+            onClick={() => setActiveTab('orders')}
+          >
+            <ShoppingBag size={17} />
+            <span>Orders & Fulfillment ({orders.length})</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <main className="hims-admin-main-container">
+
+        {/* =========================================================================
+            TAB 1: REVENUE & FINANCIAL ANALYTICS
+           ========================================================================= */}
+        {activeTab === 'analytics' && (
+          <div className="hims-admin-analytics-view animate-fade-in">
+            {/* KPI Stat Cards Grid */}
+            <div className="hims-admin-kpi-grid">
+              <div className="admin-kpi-card">
+                <div className="kpi-icon-wrap revenue">
+                  <DollarSign size={22} />
+                </div>
+                <div className="kpi-data">
+                  <span className="kpi-label">Gross Revenue (MTD)</span>
+                  <div className="kpi-value">${totalRevenue.toLocaleString()}</div>
+                  <div className="kpi-trend positive">
+                    <TrendingUp size={13} />
+                    <span>+18.4% vs last month</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="admin-kpi-card">
+                <div className="kpi-icon-wrap profit">
+                  <TrendingUp size={22} />
+                </div>
+                <div className="kpi-data">
+                  <span className="kpi-label">Net Operating Profit</span>
+                  <div className="kpi-value">${netProfit.toLocaleString()}</div>
+                  <div className="kpi-trend positive">
+                    <span>{profitMarginPercent}% Avg Gross Margin</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="admin-kpi-card">
+                <div className="kpi-icon-wrap orders">
+                  <ShoppingBag size={22} />
+                </div>
+                <div className="kpi-data">
+                  <span className="kpi-label">Total Completed Orders</span>
+                  <div className="kpi-value">2,418</div>
+                  <div className="kpi-trend positive">
+                    <span>+142 this week</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="admin-kpi-card">
+                <div className="kpi-icon-wrap aov">
+                  <Package size={22} />
+                </div>
+                <div className="kpi-data">
+                  <span className="kpi-label">Average Order Value (AOV)</span>
+                  <div className="kpi-value">$61.58</div>
+                  <div className="kpi-trend positive">
+                    <span>+$4.20 with Companion Add-ons</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Sales Breakdown & Revenue Velocity */}
+            <div className="admin-charts-grid">
+              {/* 30-Day Sales Trend Bar Graph */}
+              <div className="admin-chart-card">
+                <div className="chart-header">
+                  <div>
+                    <h3 className="chart-title">30-Day Sales & Order Velocity</h3>
+                    <p className="chart-sub">DTC Skincare Daily Revenue Breakdown</p>
+                  </div>
+                  <div className="chart-legend">
+                    <span className="legend-item"><span className="dot one-time" /> Direct Orders</span>
+                    <span className="legend-item"><span className="dot subscription" /> Auto-Refills</span>
+                  </div>
+                </div>
+
+                <div className="admin-bar-chart-visual">
+                  {[
+                    { day: 'Day 1', total: 3800, h: 45 },
+                    { day: 'Day 3', total: 4200, h: 52 },
+                    { day: 'Day 6', total: 4900, h: 62 },
+                    { day: 'Day 9', total: 5400, h: 70 },
+                    { day: 'Day 12', total: 5100, h: 65 },
+                    { day: 'Day 15', total: 6200, h: 80 },
+                    { day: 'Day 18', total: 5900, h: 75 },
+                    { day: 'Day 21', total: 6800, h: 88 },
+                    { day: 'Day 24', total: 7200, h: 94 },
+                    { day: 'Day 27', total: 6900, h: 90 },
+                    { day: 'Today', total: 7850, h: 100 }
+                  ].map((bar, idx) => (
+                    <div key={idx} className="chart-bar-col">
+                      <div className="chart-bar-tooltip">${bar.total.toLocaleString()}</div>
+                      <div className="chart-bar-track">
+                        <div
+                          className="chart-bar-fill"
+                          style={{ height: `${bar.h}%` }}
+                        />
+                      </div>
+                      <span className="chart-bar-label">{bar.day}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Top Selling Products Leaderboard */}
+              <div className="admin-leaderboard-card">
+                <h3 className="chart-title">Top Products</h3>
+
+                <div className="leaderboard-list">
+                  {products.slice(0, 5).map((prod, index) => {
+                    const unitsSold = 840 - index * 140;
+                    const prodRev = unitsSold * prod.basePrice;
+                    const margin = Math.round(((prod.basePrice - 14) / prod.basePrice) * 100);
+
+                    return (
+                      <div key={prod.id} className="leaderboard-row">
+                        <div className="leaderboard-rank">{index + 1}</div>
+                        <img src={prod.image} alt={prod.title} className="leaderboard-thumb" />
+                        <div className="leaderboard-info">
+                          <div className="leaderboard-title">{prod.title}</div>
+                          <div className="leaderboard-stats">
+                            {unitsSold} units • ${prod.basePrice} retail
+                          </div>
+                        </div>
+                        <div className="leaderboard-revenue-col">
+                          <div className="leaderboard-amount">${prodRev.toLocaleString()}</div>
+                          <div className="leaderboard-margin">{margin}% margin</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* =========================================================================
+            TAB 2: PRODUCT CATALOG & PRICING MANAGEMENT
+           ========================================================================= */}
+        {activeTab === 'products' && (
+          <div className="hims-admin-products-view animate-fade-in">
+            {/* Toolbar: Search, Category Filter, and Add Button */}
+            <div className="admin-products-toolbar">
+              <div className="toolbar-search-wrap">
+                <Search size={16} />
+                <input
+                  type="text"
+                  placeholder="Search products by title, formula, or active..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="toolbar-search-input"
+                />
+              </div>
+
+              <div className="toolbar-filter-wrap">
+                <Filter size={15} />
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="toolbar-category-select"
+                >
+                  {availableCategories.map(cat => (
+                    <option key={cat} value={cat}>
+                      {cat === 'All' ? 'All Categories' : cat}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <button
+                type="button"
+                className="hims-btn-black toolbar-add-btn"
+                onClick={handleOpenAddProduct}
+              >
+                <Plus size={16} />
+                <span>Add Product</span>
+              </button>
+            </div>
+
+            {/* Products Data Table */}
+            <div className="admin-table-container">
+              <table className="admin-products-table">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Category</th>
+                    <th>Retail Price</th>
+                    <th>Compare-At</th>
+                    <th>Unit Cost</th>
+                    <th>Margin</th>
+                    <th>Stock</th>
+                    <th>Status</th>
+                    <th style={{ textAlign: 'right' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredProducts.map((product) => {
+                    const price = product.basePrice || 48;
+                    const compareAt = product.compareAtPrice || Math.round(price * 1.25);
+                    const cost = product.costPerItem || 14;
+                    const margin = Math.round(((price - cost) / price) * 100);
+                    const stockCount = product.stock !== undefined ? product.stock : 250;
+
+                    return (
+                      <tr key={product.id}>
+                        {/* Product Title & Thumbnail */}
+                        <td className="product-col">
+                          <div className="table-product-cell">
+                            <div className="table-img-wrap">
+                              <img src={product.image} alt={product.title} />
+                            </div>
+                            <div>
+                              <div className="table-product-title">{product.title}</div>
+                              <div className="table-product-sku">SKU: {product.id}</div>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Category */}
+                        <td>
+                          <span className="table-category-tag">
+                            {product.category || 'Skincare'}
+                          </span>
+                        </td>
+
+                        {/* Retail Price (Editable) */}
+                        <td>
+                          <div className="table-price-input-wrap">
+                            <span>$</span>
+                            <input
+                              type="number"
+                              defaultValue={price}
+                              onBlur={(e) => handleQuickPriceChange(product.id, e.target.value)}
+                              className="table-inline-input"
+                            />
+                          </div>
+                        </td>
+
+                        {/* Compare-At Price */}
+                        <td>
+                          <span className="table-compare-price">${compareAt}</span>
+                        </td>
+
+                        {/* Unit Cost */}
+                        <td>
+                          <span className="table-cost-price">${cost}</span>
+                        </td>
+
+                        {/* Profit Margin */}
+                        <td>
+                          <span className={`table-margin-badge ${margin >= 60 ? 'high' : 'medium'}`}>
+                            {margin}%
+                          </span>
+                        </td>
+
+                        {/* Stock Inventory */}
+                        <td>
+                          <span className="table-stock-num">{stockCount} units</span>
+                        </td>
+
+                        {/* Status */}
+                        <td>
+                          <span className={`table-status-pill ${stockCount > 20 ? 'in-stock' : 'low-stock'}`}>
+                            {stockCount > 20 ? 'In Stock' : 'Low Stock'}
+                          </span>
+                        </td>
+
+                        {/* Actions */}
+                        <td style={{ textAlign: 'right' }}>
+                          <div className="table-actions-group">
+                            <button
+                              type="button"
+                              className="table-action-icon edit"
+                              onClick={() => handleOpenEditProduct(product)}
+                              title="Edit details & photos"
+                            >
+                              <Edit3 size={15} />
+                            </button>
+                            <button
+                              type="button"
+                              className="table-action-icon view"
+                              onClick={() => {
+                                onNavigateToProduct(product.id);
+                              }}
+                              title="View on live storefront"
+                            >
+                              <Eye size={15} />
+                            </button>
+                            <button
+                              type="button"
+                              className="table-action-icon delete"
+                              onClick={() => {
+                                if (window.confirm(`Delete "${product.title}" from catalog?`)) {
+                                  onDeleteProduct(product.id);
+                                  showToast(`Deleted "${product.title}"`);
+                                }
+                              }}
+                              title="Delete product"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* =========================================================================
+            TAB 3: ORDERS & FULFILLMENT MANAGEMENT
+           ========================================================================= */}
+        {activeTab === 'orders' && (
+          <div className="hims-admin-orders-view animate-fade-in">
+            <div className="admin-table-container">
+              <table className="admin-products-table">
+                <thead>
+                  <tr>
+                    <th>Order #</th>
+                    <th>Customer</th>
+                    <th>Date</th>
+                    <th>Items Purchased</th>
+                    <th>Payment</th>
+                    <th>Total</th>
+                    <th>Fulfillment Status</th>
+                    <th style={{ textAlign: 'right' }}>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orders.map((ord) => (
+                    <tr key={ord.id}>
+                      <td className="order-number-cell">
+                        <strong>{ord.id}</strong>
+                      </td>
+                      <td>
+                        <div className="order-cust-name">{ord.customer}</div>
+                        <div className="order-cust-email">{ord.email}</div>
+                      </td>
+                      <td>{ord.date}</td>
+                      <td>
+                        <div className="order-items-summary">{ord.items}</div>
+                      </td>
+                      <td>
+                        <span className="order-payment-method">{ord.payment}</span>
+                      </td>
+                      <td>
+                        <strong>${ord.total.toFixed(2)}</strong>
+                      </td>
+                      <td>
+                        <span className={`order-status-tag ${ord.status.toLowerCase()}`}>
+                          {ord.status}
+                        </span>
+                      </td>
+                      <td style={{ textAlign: 'right' }}>
+                        <button
+                          type="button"
+                          className="hims-btn-outline order-update-status-btn"
+                          onClick={() => handleToggleOrderStatus(ord.id)}
+                        >
+                          Update Status
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+      </main>
+
+      {/* =========================================================================
+          ADD / EDIT PRODUCT MODAL WITH AUTO BACKGROUND REMOVER
+         ========================================================================= */}
+      {isProductModalOpen && (
+        <div className="hims-admin-modal-overlay" role="dialog" aria-modal="true">
+          <div className="hims-admin-modal-card animate-fade-in">
+            <div className="admin-modal-header">
+              <h2 className="admin-modal-title">
+                {editingProductId ? 'Edit Product' : 'Add New Skincare Product'}
+              </h2>
+              <button
+                type="button"
+                className="admin-modal-close-btn"
+                onClick={() => setIsProductModalOpen(false)}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveProduct} className="admin-modal-form">
+              <div className="admin-modal-form-grid">
+
+                {/* Left Column: Product Details */}
+                <div className="form-col-left">
+                  <div className="hims-input-group">
+                    <label className="hims-input-label">Product Title</label>
+                    <input
+                      type="text"
+                      className="hims-auth-input"
+                      placeholder="e.g. Ceramide Barrier Recovery Crème"
+                      value={formData.title}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div className="hims-input-group">
+                    <label className="hims-input-label">Subtitle / Key Value Prop</label>
+                    <input
+                      type="text"
+                      className="hims-auth-input"
+                      placeholder="e.g. Deep 72-Hour Lipid Barrier Restoration"
+                      value={formData.subtitle}
+                      onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-row-2col">
+                    <div className="hims-input-group">
+                      <label className="hims-input-label">Category Name</label>
+                      <input
+                        type="text"
+                        list="admin-category-suggestions"
+                        className="hims-auth-input"
+                        placeholder="e.g. Skincare, Serums, Moisturizers, Cleansers..."
+                        value={formData.category}
+                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                        required
+                      />
+                      <datalist id="admin-category-suggestions">
+                        {availableCategories.filter(c => c !== 'All').map(c => (
+                          <option key={c} value={c} />
+                        ))}
+                      </datalist>
+                      <div className="category-quick-pills">
+                        {['Skincare', 'Serums', 'Creams', 'Cleansers', 'Sunscreen'].map(chip => (
+                          <button
+                            key={chip}
+                            type="button"
+                            className={`category-pill-tag ${formData.category?.toLowerCase() === chip.toLowerCase() ? 'active' : ''}`}
+                            onClick={() => setFormData({ ...formData, category: chip })}
+                          >
+                            {formData.category?.toLowerCase() === chip.toLowerCase() ? '✓ ' : '+ '}{chip}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="hims-input-group">
+                      <label className="hims-input-label">Inventory Stock</label>
+                      <input
+                        type="number"
+                        className="hims-auth-input"
+                        value={formData.stock}
+                        onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-row-3col">
+                    <div className="hims-input-group">
+                      <label className="hims-input-label">Retail Price ($)</label>
+                      <input
+                        type="number"
+                        step="0.5"
+                        className="hims-auth-input"
+                        value={formData.basePrice}
+                        onChange={(e) => setFormData({ ...formData, basePrice: e.target.value })}
+                        required
+                      />
+                    </div>
+
+                    <div className="hims-input-group">
+                      <label className="hims-input-label">Compare-At ($)</label>
+                      <input
+                        type="number"
+                        step="0.5"
+                        className="hims-auth-input"
+                        value={formData.compareAtPrice}
+                        onChange={(e) => setFormData({ ...formData, compareAtPrice: e.target.value })}
+                      />
+                    </div>
+
+                    <div className="hims-input-group">
+                      <label className="hims-input-label">Cost per Item ($)</label>
+                      <input
+                        type="number"
+                        step="0.5"
+                        className="hims-auth-input"
+                        value={formData.costPerItem}
+                        onChange={(e) => setFormData({ ...formData, costPerItem: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="hims-input-group">
+                    <label className="hims-input-label">Active Ingredients Formula</label>
+                    <input
+                      type="text"
+                      className="hims-auth-input"
+                      placeholder="e.g. Ceramides 3.0% • Niacinamide 4.0% • Squalane 5.0%"
+                      value={formData.activeFormula}
+                      onChange={(e) => setFormData({ ...formData, activeFormula: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="hims-input-group">
+                    <label className="hims-input-label">Product Description</label>
+                    <textarea
+                      className="hims-auth-input"
+                      rows={3}
+                      placeholder="Detailed customer-facing product description..."
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      style={{ resize: 'none', height: 'auto' }}
+                    />
+                  </div>
+                </div>
+
+                {/* Right Column: Product Image Upload */}
+                <div className="form-col-right">
+                  <div className="product-image-upload-card">
+                    <div className="studio-header">
+                      <div className="studio-title-row">
+                        <ImageIcon size={18} color="#8C6D53" />
+                        <h4 className="studio-title">Product Visual Asset</h4>
+                      </div>
+                      <span className="studio-badge required">Required • Transparent PNG</span>
+                    </div>
+
+                    {/* Notice / Guideline Banner */}
+                    <div className="image-guideline-banner">
+                      <Sparkles size={16} className="guideline-icon" />
+                      <div className="guideline-text">
+                        <strong>Quality Guideline:</strong>
+                        <span>Please upload an image with the background already removed (transparent PNG) so that it will look best on the website.</span>
+                      </div>
+                    </div>
+
+                    {imageError && (
+                      <div className="image-required-alert">
+                        <AlertCircle size={16} />
+                        <span>Product image is required before this item can be published to the store.</span>
+                      </div>
+                    )}
+
+                    {/* Upload Drop Zone */}
+                    <div
+                      className={`studio-upload-zone ${imageError ? 'error-ring' : ''}`}
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleImageFileChange}
+                        accept="image/png,image/webp,image/jpeg"
+                        style={{ display: 'none' }}
+                      />
+                      <div className="upload-icon-circle">
+                        <Upload size={22} color={imageError ? '#b91c1c' : '#8C6D53'} />
+                      </div>
+                      <div className="upload-zone-text">
+                        <strong>Click to select product image *</strong>
+                        <span>PNG with transparent background (or JPG/WEBP)</span>
+                        <span className="upload-sub-spec">Required • Recommended: 1000 x 1000px square</span>
+                      </div>
+                    </div>
+
+                    {/* Live Storefront Background Preview */}
+                    {formData.image ? (
+                      <div className="image-preview-card">
+                        <div className="preview-card-header">
+                          <div className="preview-status-pill">
+                            <CheckCircle size={14} color="#2D5A27" />
+                            <span>Image Loaded for Storefront</span>
+                          </div>
+                          <button
+                            type="button"
+                            className="preview-remove-btn"
+                            onClick={() => setFormData(prev => ({ ...prev, image: null }))}
+                            title="Remove Image"
+                          >
+                            <Trash2 size={14} />
+                            <span>Remove</span>
+                          </button>
+                        </div>
+
+                        <div className="preview-box full-width">
+                          <span className="preview-label">Live Storefront Background Preview (#fffdfa)</span>
+                          <div className="preview-img-container storefront-preview">
+                            <img src={formData.image} alt="Product Preview" />
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className={`image-empty-placeholder ${imageError ? 'error-border' : ''}`}>
+                        <ImageIcon size={32} strokeWidth={1.5} color={imageError ? '#ef4444' : '#D1C7BD'} />
+                        <span style={imageError ? { color: '#b91c1c', fontWeight: 600 } : {}}>
+                          {imageError
+                            ? 'A product image is mandatory. Please click above to upload a transparent PNG.'
+                            : 'No image uploaded yet. A transparent PNG cutout is required for presentation on the website.'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Modal Footer Actions */}
+              <div className="admin-modal-footer">
+                <button
+                  type="button"
+                  className="hims-btn-outline"
+                  onClick={() => setIsProductModalOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="hims-btn-black"
+                >
+                  {editingProductId ? 'Update Product in Catalog' : 'Publish Product to Storefront'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}

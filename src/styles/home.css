@@ -1,0 +1,541 @@
+/* SECTION 1: HERO BANNER (Image 1 reference) */
+.hims-hero-card {
+  background-color: #E8E0D5;
+  border-radius: 28px;
+  min-height: 520px;
+  height: 540px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 60px;
+  border: 1px solid rgba(229, 223, 213, 0.6);
+  animation: himsHeroFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes himsHeroFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* High-res product photo filling the card */
+.hims-hero-bg-img {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center right;
+  z-index: 1;
+}
+
+/* Seamless gradient fade between text on left and product photo on right */
+.hims-hero-gradient-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    #E8E0D5 0%,
+    #E8E0D5 36%,
+    rgba(232, 224, 213, 0.96) 46%,
+    rgba(232, 224, 213, 0.6) 56%,
+    rgba(232, 224, 213, 0) 72%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+.hims-hero-content {
+  padding: 0 0 0 60px;
+  max-width: 490px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+  position: relative;
+  z-index: 3;
+}
+
+.hims-hero-headline {
+  font-size: 2.35rem;
+  font-weight: 600;
+  line-height: 1.18;
+  letter-spacing: -0.025em;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+.hims-hero-sub {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: #3d3935 !important;
+  -webkit-text-fill-color: #3d3935 !important;
+  max-width: 420px;
+}
+
+.hims-hero-cta {
+  padding: 12px 28px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  margin-top: 6px;
+  letter-spacing: -0.01em;
+}
+
+/* SECTION 2: CATEGORY TRIO CARDS (Image 0 reference) */
+.hims-category-section {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.hims-trio-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 24px;
+}
+
+/* Model card with dark overlay text */
+.hims-model-card {
+  border-radius:15px;
+  overflow: hidden;
+  position: relative;
+  min-height: 460px;
+  display: flex;
+  align-items: flex-start;
+  padding: 36px;
+}
+
+.hims-model-card img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.hims-model-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.5) 100%);
+  z-index: 2;
+}
+
+.hims-model-title {
+  position: relative;
+  z-index: 3;
+  color: #FFFFFF;
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+/* Clean Product Treatment Card */
+.hims-treatment-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 32px 28px;
+  display: flex;
+  gap: 45px;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  min-height: 460px;
+}
+
+.treatment-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.treatment-card-title {
+  font-size: 1.35rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  color: var(--text-main);
+}
+
+.treatment-card-badge {
+  background: #afa599;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+.treatment-card-price {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #524c46;
+}
+
+.treatment-card-img-wrap {
+  width: 100%;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}
+
+.treatment-card-img-wrap img {
+  max-height: 95%;
+  max-width: 95%;
+  object-fit: contain;
+  filter: drop-shadow(0 14px 16px rgba(0, 0, 0, 0.1));
+  transition: transform var(--transition-smooth);
+}
+
+.hims-treatment-card:hover .treatment-card-img-wrap img {
+  transform: translateY(-4px) scale(1.02);
+}
+
+.treatment-card-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.treatment-safety-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: #524c46;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.treatment-btn-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* Hims Buttons */
+.hims-btn-black {
+  background: var(--brand-black);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 12px 22px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: all var(--transition-fast);
+}
+.hims-btn-black:hover {
+  background: #2a2522;
+  transform: translateY(-1px);
+}
+
+.hims-btn-white {
+  background: #ffffff;
+  color: #1c1917;
+  border: 1px solid rgba(229, 223, 213, 0.9);
+  border-radius: var(--radius-full);
+  padding: 12px 20px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all var(--transition-fast);
+}
+.hims-btn-white:hover {
+  background: #fdfdfd;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+}
+
+.hims-btn-outline {
+  background: transparent;
+  color: #1c1917;
+  border: 1px solid rgba(200, 192, 180, 0.85);
+  border-radius: var(--radius-full);
+  padding: 12px 20px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: all var(--transition-fast);
+}
+.hims-btn-outline:hover {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: #beb4a5;
+}
+
+/* Bottom Category Row with Description and Shop All Arrow */
+.hims-category-subrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 12px 4px;
+}
+
+.hims-category-subtext {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+  max-width: 680px;
+}
+
+.hims-shop-all-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform var(--transition-fast);
+}
+.hims-shop-all-btn:hover {
+  transform: translateX(4px);
+}
+
+.circle-arrow-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--brand-black);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+/* SECTION 3: PRODUCT BASICS ROW (Image 3 reference) */
+.hims-basics-section {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  margin-top: 60px;
+}
+
+.hims-section-top-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 32px;
+}
+
+.hims-section-title {
+  font-size: 2.8rem;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  color: var(--text-main);
+  line-height: 1.15;
+  max-width: 580px;
+}
+
+.hims-section-header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.hims-section-desc {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  max-width: 440px;
+  line-height: 1.55;
+  text-align: right;
+}
+
+.hims-scroll-arrows {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.hims-arrow-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.hims-arrow-btn:hover {
+  background: var(--brand-black);
+  color: #ffffff;
+  border-color: var(--brand-black);
+}
+
+.hims-basics-scroll-wrap {
+  width: 100%;
+  position: relative;
+  overflow: visible;
+}
+
+.hims-basics-track {
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  padding: 4px 2px 20px 2px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.hims-basics-track::-webkit-scrollbar {
+  display: none;
+}
+
+.hims-basic-card {
+  flex: 0 0 355px;
+  min-width: 355px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.basic-card-img-box {
+  background: var(--bg-card);
+  border-radius:15px;
+  height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 20px;
+  transition: background var(--transition-fast);
+}
+
+.basic-card-badge {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: #B4ACA2;
+  color: #FFFFFF;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 4px 14px;
+  border-radius: var(--radius-full);
+  z-index: 2;
+  letter-spacing: 0.01em;
+}
+
+.basic-product-cutout-img {
+  max-height: 84%;
+  max-width: 84%;
+  object-fit: contain;
+  filter: drop-shadow(0 14px 18px rgba(0,0,0,0.08));
+  transition: transform var(--transition-smooth);
+  /* ponytail: tell browser compositor to optimize layer before hover transform */
+  will-change: transform;
+}
+
+.hims-basic-card:hover .basic-product-cutout-img {
+  transform: translateY(-4px) scale(1.03);
+}
+
+.basic-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.basic-card-title {
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--text-main);
+  line-height: 1.25;
+}
+
+.basic-card-price {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.basic-card-text {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+  min-height: 4.6em;
+}
+
+.basic-card-btn {
+  width: 100%;
+  margin-top: 6px;
+}
+
+.hims-basics-disclaimer {
+  font-size: 0.76rem;
+  color: var(--text-subtle);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+/* SECTION 4: THE SCIENCE BEHIND FORMULATIONS (Image 4 reference) */
+.hims-science-section {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.hims-science-diagram-card {
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  padding: 30px;
+}
+
+.hims-science-diagram-card img {
+  width: 100%;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+}
+
+.hims-science-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+.science-item-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-main);
+  margin-bottom: 8px;
+}
+
+.science-item-text {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+

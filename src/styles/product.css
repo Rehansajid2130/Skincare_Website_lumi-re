@@ -1,0 +1,482 @@
+/* SECTION 5: PRODUCT DETAIL PAGE VIEW (Image 2 reference) */
+.hims-product-detail-layout {
+  display: grid;
+  margin-top: 80px;
+  margin-bottom: 80px;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 72px;
+  align-items: center;
+}
+
+.hims-product-left-canvas {
+  background: #E8DDD2;
+  border-radius: var(--radius-xl);
+  padding: 48px 36px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 640px;
+  overflow: hidden;
+  position: relative;
+}
+
+.hims-rx-product-img {
+  max-width: 84%;
+  max-height: 480px;
+  object-fit: contain;
+  filter: drop-shadow(0 24px 36px rgba(120, 95, 75, 0.16));
+  transition: transform var(--transition-smooth);
+  /* ponytail: tell browser compositor to optimize layer before hover transform */
+  will-change: transform;
+}
+
+.hims-product-left-canvas:hover .hims-rx-product-img {
+  transform: translateY(-4px) scale(1.02);
+}
+
+.hims-product-right-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 490px;
+  padding: 40px 0;
+}
+
+.hims-product-headline {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  color: var(--text-main);
+  margin-bottom: 32px;
+}
+
+.hims-checklist-group {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.hims-check-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.hims-check-circle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #9E7453;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.hims-check-heading {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+.hims-check-desc {
+  font-size: 0.94rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.hims-product-cta-row {
+  display: flex;
+  gap: 14px;
+  margin-top: 36px;
+  align-items: center;
+}
+
+.product-active-formula-pill {
+  position: absolute;
+  bottom: 24px;
+  background: #ffffff;
+  border-radius: var(--radius-full);
+  padding: 10px 22px;
+  border: 1px solid var(--border-subtle);
+  font-size: 0.82rem;
+  color: var(--text-main);
+  text-align: center;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  max-width: 90%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* SECTION 6: CATEGORIES HORIZONTAL SLIDER (Matching User Reference) */
+.hims-categories-section {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  margin-top: 50px;
+  margin-bottom: 20px;
+}
+
+.hims-category-scroll-wrap {
+  width: 100%;
+  position: relative;
+  overflow: visible;
+}
+
+.hims-category-track {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  padding: 8px 4px 24px 4px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.hims-category-track::-webkit-scrollbar {
+  display: none;
+}
+
+.hims-category-pill-card {
+  flex: 0 0 280px;
+  min-width: 280px;
+  height: 180px;
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  padding: 24px 22px;
+  cursor: pointer;
+  scroll-snap-align: start;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+.hims-category-pill-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.09);
+}
+
+.hims-category-pill-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--text-main);
+  z-index: 2;
+  line-height: 1.2;
+}
+
+.hims-category-pill-img-wrap {
+  position: absolute;
+  right: 12px;
+  bottom: 0;
+  top: 12px;
+  width: 145px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.hims-category-pill-img {
+  max-height: 92%;
+  max-width: 96%;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.08));
+  transition: transform var(--transition-smooth);
+}
+
+.hims-category-pill-card:hover .hims-category-pill-img {
+  transform: translateY(-4px) scale(1.06);
+}
+
+@media (max-width: 640px) {
+  .hims-category-pill-card {
+    flex: 0 0 220px;
+    min-width: 220px;
+    height: 155px;
+    padding: 18px 16px;
+    border-radius: 16px;
+  }
+  .hims-category-pill-title {
+    font-size: 1.15rem;
+  }
+  .hims-category-pill-img-wrap {
+    width: 110px;
+    right: 8px;
+  }
+}
+
+/* Refined Luxury Typography on Product Detail Page */
+.hims-product-page-view .hims-product-detail-layout {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 64px;
+  align-items: flex-start;
+  margin-top: 16px;
+  margin-bottom: 56px;
+}
+
+.hims-product-page-view .hims-product-left-canvas {
+  height: 580px;
+  min-height: 560px;
+  padding: 40px 32px;
+  background: #E8DDD2;
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.hims-product-page-view .hims-rx-product-img {
+  max-width: 88%;
+  max-height: 450px;
+  object-fit: contain;
+  filter: drop-shadow(0 20px 32px rgba(120, 95, 75, 0.18));
+  transition: transform var(--transition-smooth);
+}
+
+.hims-product-page-view .hims-product-left-canvas:hover .hims-rx-product-img {
+  transform: translateY(-6px) scale(1.03);
+}
+
+.hims-product-page-view .hims-product-right-info {
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
+  max-width: 520px;
+  padding: 4px 0;
+}
+
+.hims-product-page-view .hims-product-headline {
+  font-size: 2.1rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  margin-top: 4px;
+  margin-bottom: 6px;
+}
+
+.hims-product-page-view .hims-product-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.hims-product-page-view .hims-cta-main-btn {
+  padding: 16px 28px;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: var(--radius-full);
+}
+
+.hims-product-page-view .hims-pill-select-btn {
+  padding: 12px 16px;
+}
+
+.hims-product-page-view .hims-subscribe-box {
+  padding: 14px 18px;
+}
+
+.hims-product-page-view .product-active-formula-pill {
+  font-size: 0.76rem;
+  padding: 8px 18px;
+  bottom: 20px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(8px);
+}
+
+/* Lower Details Section: Benefits Checklist, Clinical Trial Metrics, Accordions */
+.hims-product-details-lower {
+  margin-top: 56px;
+  padding-top: 56px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 44px;
+}
+
+.hims-product-benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.hims-benefit-box {
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: all var(--transition-fast);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+}
+
+.hims-benefit-box:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
+  border-color: #d8cebe;
+}
+
+.hims-benefit-box .hims-check-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #9E7453;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hims-benefit-box .hims-check-heading {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.hims-benefit-box .hims-check-desc {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.hims-clinical-stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 36px 32px;
+}
+
+.hims-clinical-stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+}
+
+.hims-stat-percent {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--brand-black);
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.hims-stat-label {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  max-width: 240px;
+  line-height: 1.5;
+}
+
+.hims-product-guarantees-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 16px;
+}
+
+.hims-product-pairings-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.hims-reviews-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.hims-product-reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+/* Variant Pill Selectors & Subscription Switch on Product Page */
+.hims-pills-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.hims-pill-select-btn {
+  background: #ffffff;
+  border: 2px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.hims-pill-select-btn.selected {
+  border-color: var(--brand-black);
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+.hims-subscribe-box {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+/* Primary Product CTA */
+.hims-cta-block {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hims-cta-main-btn {
+  background: var(--brand-black);
+  color: var(--bg-card);
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 18px 32px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-shadow: 0 10px 24px rgba(18, 16, 14, 0.2);
+  transition: all var(--transition-fast);
+}
+.hims-cta-main-btn:hover {
+  background: #2a2522;
+  transform: translateY(-2px);
+}
+

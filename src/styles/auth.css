@@ -1,0 +1,476 @@
+/* ==========================================================================
+   HIMS-INSPIRED ONBOARDING & AUTH DRAWER (Reference Images 1, 2, 3, 4)
+   ========================================================================== */
+
+.hims-auth-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(18, 16, 14, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1100;
+  animation: fadeInBackdrop 0.2s ease;
+}
+
+@keyframes fadeInBackdrop {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.hims-auth-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  max-width: 480px;
+  background: #fffdfa;
+  z-index: 1101;
+  box-shadow: -12px 0 40px rgba(35, 25, 18, 0.22);
+  display: flex;
+  flex-direction: column;
+  animation: slideDrawer 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: var(--font-sans);
+}
+
+.hims-auth-drawer.loading-mode {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #E8DDD2;
+}
+
+.hims-auth-header {
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  background: #fffdfa;
+}
+
+.hims-auth-close-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #111111;
+  transition: all var(--transition-fast);
+}
+
+.hims-auth-close-btn:hover {
+  background: #ffffff;
+  transform: scale(1.05);
+}
+
+.hims-auth-header-title {
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #111111;
+  letter-spacing: -0.01em;
+}
+
+.hims-auth-content-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 36px 36px 44px;
+  display: flex;
+  flex-direction: column;
+}
+
+.hims-auth-main-heading {
+  font-family: var(--font-heading);
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #111111;
+  letter-spacing: -0.03em;
+  line-height: 1.18;
+  margin-bottom: 28px;
+}
+
+.hims-auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.hims-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hims-input-label {
+  font-family: var(--font-sans);
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #26211C;
+}
+
+.hims-auth-input {
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(0, 0, 0, 0.12);
+  background: #ffffff;
+  font-size: 0.98rem;
+  color: #111111;
+  outline: none;
+  transition: all 0.2s ease;
+  font-family: var(--font-sans);
+}
+
+.hims-auth-input:focus {
+  border-color: #111111;
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.1);
+}
+
+.hims-auth-forgot-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -4px;
+}
+
+.hims-auth-link-btn {
+  background: none;
+  border: none;
+  font-family: var(--font-sans);
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #111111; /* Black per user instruction */
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  transition: opacity 0.15s ease;
+}
+
+.hims-auth-link-btn:hover {
+  opacity: 0.7;
+}
+
+.hims-auth-primary-submit-btn {
+  width: 100%;
+  background: #111111;
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 15px 24px;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all var(--transition-fast);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+
+.hims-auth-primary-submit-btn:hover {
+  background: #2b2724;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+/* Divider: "or" */
+.hims-auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 22px 0 18px;
+}
+
+.hims-auth-divider-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.hims-auth-divider-text {
+  font-family: var(--font-sans);
+  font-size: 0.84rem;
+  color: #5c534b;
+  font-weight: 600;
+}
+
+/* Social Buttons */
+.hims-auth-social-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hims-auth-social-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 13px 20px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid rgba(0, 0, 0, 0.12);
+  background: #ffffff;
+  font-family: var(--font-sans);
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: #111111;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.hims-auth-social-btn:hover {
+  background: #FAF7F2;
+  border-color: #111111;
+  transform: translateY(-1px);
+}
+
+.social-icon {
+  flex-shrink: 0;
+}
+
+/* Legal Disclaimer */
+.hims-auth-legal-disclaimer {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  color: #574e46;
+  line-height: 1.55;
+  text-align: center;
+  margin-top: 18px;
+}
+
+.hims-auth-legal-disclaimer a {
+  color: #111111;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+/* Bottom Mode Switcher */
+.hims-auth-bottom-switch {
+  font-family: var(--font-sans);
+  font-size: 0.92rem;
+  color: #38322c;
+  text-align: center;
+  margin-top: 28px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.hims-auth-switch-btn {
+  background: none;
+  border: none;
+  font-family: var(--font-sans);
+  font-weight: 800;
+  color: #111111; /* Black per user instruction */
+  cursor: pointer;
+  font-size: 0.92rem;
+  padding: 0;
+  margin-left: 4px;
+  text-decoration: underline;
+}
+
+.hims-auth-switch-btn:hover {
+  opacity: 0.7;
+}
+
+.hims-auth-error-banner {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.hims-auth-success-banner {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+/* Image 4 Reference: Subtle Orbiting Loader */
+.hims-auth-loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  text-align: center;
+  padding: 40px;
+}
+
+.hims-loader-center-brand {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hims-loader-letter {
+  font-family: var(--font-logo);
+  font-size: 3.4rem;
+  font-weight: 800;
+  color: #111111;
+  line-height: 1;
+  user-select: none;
+}
+
+.hims-loader-orbit-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  animation: spinHimsOrbit 1.25s linear infinite;
+}
+
+@keyframes spinHimsOrbit {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.hims-loader-caption {
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  color: #2c2724;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* Account Overview Inside Drawer */
+.hims-account-profile-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #decbbe;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.hims-account-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #111111;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hims-account-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hims-account-name {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #111111;
+}
+
+.hims-account-email {
+  font-size: 0.86rem;
+  color: #574e46;
+}
+
+.hims-account-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #15803d;
+  background: #dcfce7;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  width: fit-content;
+  margin-top: 4px;
+}
+
+.hims-account-actions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.hims-account-action-row {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--transition-fast);
+}
+
+.hims-account-action-row:hover {
+  border-color: #111111;
+  transform: translateX(2px);
+  background: #FAF7F2;
+}
+
+.action-row-title {
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: #111111;
+}
+
+.action-row-sub {
+  font-size: 0.82rem;
+  color: #635a51;
+  margin-top: 2px;
+}
+
+.hims-auth-logout-btn {
+  margin-top: auto;
+  background: #ffffff;
+  border: 1.5px solid #dc2626;
+  border-radius: var(--radius-full);
+  padding: 12px 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #dc2626;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all var(--transition-fast);
+}
+
+.hims-auth-logout-btn:hover {
+  background: #fef2f2;
+}
+
+/* Responsive mobile adjustments */
+@media (max-width: 480px) {
+  .hims-auth-drawer {
+    max-width: 100%;
+  }
+  .hims-auth-content-body {
+    padding: 24px 20px 36px;
+  }
+  .hims-auth-main-heading {
+    font-size: 1.6rem;
+  }
+}
+

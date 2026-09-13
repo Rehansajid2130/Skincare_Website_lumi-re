@@ -1,0 +1,245 @@
+/* ponytail: 2026 DTC Luxury Skincare Design System inspired by Hims Aesthetic */
+:root {
+  color-scheme: light;
+  
+  /* Primary UI & Headings: Aktiv Grotesk (Free alternatives: Public Sans, Inter, Roboto) */
+  --font-sans: 'Aktiv Grotesk', 'Public Sans', 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-heading: 'Aktiv Grotesk', 'Public Sans', 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  
+  /* Logo: Customized high-contrast serif inspired by/based on ITC Serif Gothic or Cheltenham Bold */
+  --font-logo: 'ITC Serif Gothic', 'Cheltenham Bold', 'Cheltenham', 'Fraunces', 'DM Serif Display', Georgia, serif;
+  
+  /* Hims Signature Warm Aesthetic Palette */
+  --bg-page: #FBF9F5;
+  --bg-page-alt: #F6F2EB;
+  --bg-card: #F1EDE6;
+  --bg-card-hover: #EBE6DE;
+  --bg-surface-white: #FFFFFF;
+  
+  --text-main: #1C1917;
+  --text-muted: #645F59;
+  --text-subtle: #8C867E;
+  
+  --brand-black: #12100E;
+  --brand-bronze: #8C6D53;
+  --brand-bronze-light: #E8DDD2;
+  
+  --pill-bg: #E4DED4;
+  --pill-text: #48433D;
+  
+  --border-subtle: #E6DFD4;
+  --border-dark: #1C1917;
+  
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-full: 9999px;
+  
+  --transition-fast: 160ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 280ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  color-scheme: light;
+  font-family: var(--font-sans);
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6, button, input, select, textarea {
+  font-family: var(--font-sans);
+}
+
+/* Top Announcement Bar */
+.hims-announcement-bar {
+  background: var(--brand-black);
+  color: #f7f3ec;
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 8px 16px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Minimal Clean DTC Header */
+.hims-header-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  width: 100%;
+  /* ponytail: promote sticky header to dedicated compositor layer to eliminate scroll paint jank */
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.hims-header {
+  background: rgba(251, 249, 245, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 14px 32px;
+}
+
+.hims-header-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.hims-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.hims-logo {
+  font-family: var(--font-logo);
+  font-size: 2.15rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--brand-black);
+  cursor: pointer;
+  text-transform: lowercase;
+  font-optical-sizing: auto;
+  font-variation-settings: "opsz" 144, "SOFT" 0, "WONK" 0;
+  line-height: 1;
+  transition: opacity var(--transition-fast);
+}
+
+.hims-logo:hover {
+  opacity: 0.85;
+}
+
+/* Center Navigation Links */
+.hims-nav-links-center {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.hims-nav-link {
+  background: none;
+  border: none;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #4a443e;
+  cursor: pointer;
+  padding: 6px 0;
+  position: relative;
+  transition: color var(--transition-fast);
+}
+
+.hims-nav-link:hover,
+.hims-nav-link.active {
+  color: var(--brand-black);
+}
+
+.hims-nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background: var(--brand-black);
+  transition: width var(--transition-fast);
+}
+
+.hims-nav-link:hover::after,
+.hims-nav-link.active::after {
+  width: 100%;
+}
+
+/* Right Header Actions */
+.hims-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hims-nav-cta-btn {
+  background: var(--brand-black);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 10px 22px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.hims-nav-cta-btn:hover {
+  background: #2a2522;
+  transform: translateY(-1px);
+}
+
+.hims-cart-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  padding: 9px 18px;
+  border-radius: var(--radius-full);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--brand-black);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all var(--transition-fast);
+}
+.hims-cart-btn:hover {
+  background: var(--bg-card-hover);
+  transform: translateY(-1px);
+}
+
+/* Mobile Toggle & Menu */
+.hims-mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--brand-black);
+  padding: 4px;
+}
+
+.hims-mobile-nav-menu {
+  display: none;
+}
+
+/* Page Containers */
+.hims-page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 10px 32px 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 130px; /* Generous breathing room between sections */
+}
+
+/* ponytail: lightweight skeleton container for lazy components */
+.hims-suspense-loader {
+  min-height: 400px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
