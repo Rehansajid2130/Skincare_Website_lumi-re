@@ -22,6 +22,7 @@ export default function App() {
   const [lastOrderData, setLastOrderData] = useState(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
+  const [checkoutMethod, setCheckoutMethod] = useState('standard');
   const [currentUser, setCurrentUser] = useState(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authInitialMode, setAuthInitialMode] = useState('login');
@@ -148,7 +149,8 @@ export default function App() {
     saveCart(updated);
   };
 
-  const handleTriggerCheckout = (method) => {
+  const handleTriggerCheckout = (method = 'standard') => {
+    setCheckoutMethod(method);
     setIsCartOpen(false);
     setIsCheckoutModalOpen(true);
   };
@@ -171,18 +173,20 @@ export default function App() {
 
   return (
     <div className="hims-styled-app">
-      {/* Clean Minimal Header */}
-      <Header 
-        currentView={currentView}
-        setCurrentView={setCurrentView}
-        cartItems={cartItems}
-        setIsCartOpen={setIsCartOpen}
-        onNavigateToProductPage={handleNavigateToProduct}
-        currentUser={currentUser}
-        onOpenAuth={handleOpenAuth}
-        onOpenQuiz={() => setIsQuizOpen(true)}
-        isQuizCompleted={isQuizCompleted}
-      />
+      {/* Clean Minimal Header (Storefront only, Admin has dedicated console header) */}
+      {currentView !== 'admin' && (
+        <Header 
+          currentView={currentView}
+          setCurrentView={setCurrentView}
+          cartItems={cartItems}
+          setIsCartOpen={setIsCartOpen}
+          onNavigateToProductPage={handleNavigateToProduct}
+          currentUser={currentUser}
+          onOpenAuth={handleOpenAuth}
+          onOpenQuiz={() => setIsQuizOpen(true)}
+          isQuizCompleted={isQuizCompleted}
+        />
+      )}
 
       {/* Main Content Area */}
       <main className="hims-page-container">
@@ -275,6 +279,7 @@ export default function App() {
         onUpdateQty={handleUpdateQty}
         onRemoveItem={handleRemoveItem}
         onTriggerCheckout={handleTriggerCheckout}
+        onAddToCart={handleAddToCart}
       />
 
       {/* Onboarding & Authentication Drawer (Lazy) */}
@@ -306,23 +311,26 @@ export default function App() {
             isOpen={isCheckoutModalOpen}
             onClose={() => setIsCheckoutModalOpen(false)}
             cartItems={cartItems}
+            checkoutMethod={checkoutMethod}
             onOrderComplete={handleOrderComplete}
           />
         </Suspense>
       )}
 
-      {/* Minimal Footer */}
-      <Footer 
-        onNavigateToLanding={() => {
-          setCurrentView('landing');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
-        onNavigateToProductPage={() => handleNavigateToProduct('custom-anti-aging-serum')}
-        onNavigateToAdmin={() => {
-          setCurrentView('admin');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
-      />
+      {/* Minimal Footer (Storefront only) */}
+      {currentView !== 'admin' && (
+        <Footer 
+          onNavigateToLanding={() => {
+            setCurrentView('landing');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          onNavigateToProductPage={() => handleNavigateToProduct('custom-anti-aging-serum')}
+          onNavigateToAdmin={() => {
+            setCurrentView('admin');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+        />
+      )}
 
       {/* Quick Developer / Admin Switcher Button (Bottom Left) */}
       <div className="hims-admin-quick-toggle">

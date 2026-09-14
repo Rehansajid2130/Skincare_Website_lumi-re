@@ -1,6 +1,6 @@
 // ponytail: high-converting DTC luxury skin assessment quiz funnel matching Lumière aesthetic
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, ArrowRight, Check, Sparkles, ShieldCheck, RefreshCw, UserCheck, Droplets, Sun, Moon } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Sparkles, ShieldCheck, RefreshCw, UserCheck, Droplets, Sun, Moon, Activity, Layers } from 'lucide-react';
 import serumCutoutImg from '../assets/serum_cutout.png';
 import creamCutoutImg from '../assets/cream_cutout.png';
 import cleanserCutoutImg from '../assets/cleanser_cutout.png';
@@ -46,31 +46,31 @@ export default function SkinQuiz({
       id: 'wrinkles',
       title: 'Wrinkles & Fine Lines',
       desc: "Smooth forehead creases, smile lines, and crow's feet with researched retinoids.",
-      icon: '✨'
+      Icon: Sparkles
     },
     {
       id: 'firmness',
       title: 'Loss of Firmness & Elasticity',
       desc: 'Re-densify dermal collagen matrix to lift sagging and restore skin bounce.',
-      icon: '⚡'
+      Icon: Activity
     },
     {
       id: 'dark-spots',
       title: 'Dark Spots & Sun Damage',
       desc: 'Target stubborn hyperpigmentation and uneven skin tone from UV exposure.',
-      icon: '☀️'
+      Icon: Sun
     },
     {
       id: 'texture',
       title: 'Uneven Texture & Large Pores',
       desc: 'Refine micro-texture, minimize pore congestion, and reveal smooth skin.',
-      icon: '🌿'
+      Icon: Layers
     },
     {
       id: 'dryness',
       title: 'Dryness & Compromised Barrier',
       desc: 'Lock in deep hydration and reinforce the protective dermal moisture barrier.',
-      icon: '💧'
+      Icon: Droplets
     }
   ];
 
@@ -292,7 +292,7 @@ export default function SkinQuiz({
                   >
                     <div className="quiz-option-content">
                       <div className="quiz-option-title-row">
-                        <span className="quiz-option-icon">{item.icon}</span>
+                        <span className="quiz-option-icon"><item.Icon size={18} /></span>
                         <h3 className="quiz-option-title">{item.title}</h3>
                       </div>
                       <p className="quiz-option-desc">{item.desc}</p>
@@ -482,7 +482,7 @@ export default function SkinQuiz({
               </div>
               <div className={`analyzing-row ${analyzingStage >= 2 ? 'done' : ''}`}>
                 <Check size={16} />
-                <span>Prescription plan approved by Dr. Sarah Jenkins, MD</span>
+                <span>Custom compound calibrated & clinically verified</span>
               </div>
             </div>
           </div>
@@ -496,7 +496,7 @@ export default function SkinQuiz({
                 <span className="treatment-card-badge">Prescription Plan LM-924</span>
                 <span className="quiz-doctor-approved-badge">
                   <ShieldCheck size={14} />
-                  <span>Dermatologist Approved</span>
+                  <span>Clinically Formulated</span>
                 </span>
               </div>
               <h1 className="quiz-result-headline">
@@ -548,6 +548,23 @@ export default function SkinQuiz({
                 <div className="companion-price">+$24</div>
               </div>
             )}
+
+            {/* AM / PM Daily Protocol Blueprint */}
+            <div className="quiz-ampm-protocol-card">
+              <h4 className="ampm-title">Your Daily Treatment Protocol</h4>
+              <div className="ampm-grid">
+                <div className="ampm-col">
+                  <div className="ampm-badge am"><Sun size={14} /> Morning Protocol (60 Sec)</div>
+                  <div className="ampm-step"><strong>Step 1:</strong> High Tide Squalane Cleanser (Rinse oil & detox pores)</div>
+                  <div className="ampm-step"><strong>Step 2:</strong> Daily Mineral SPF 30 (Shield from UV & pollution)</div>
+                </div>
+                <div className="ampm-col">
+                  <div className="ampm-badge pm"><Moon size={14} /> Evening Protocol (90 Sec)</div>
+                  <div className="ampm-step"><strong>Step 1:</strong> {customFormula.name} (Rejuvenate cell turnover)</div>
+                  <div className="ampm-step"><strong>Step 2:</strong> Goodnight Wrinkle Cream (Lock in moisture barrier)</div>
+                </div>
+              </div>
+            </div>
 
             {/* Clinical Timeline */}
             <div className="quiz-timeline-row">

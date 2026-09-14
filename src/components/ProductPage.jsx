@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Star, Check, Zap, ShieldCheck, Sparkles, Truck, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
 import { PRODUCTS, REVIEWS } from '../data/products';
+import ProductCard from './ProductCard';
 
 export default function ProductPage({ product: propProduct, onAddToCart, onNavigateToProduct, onNavigateToLanding }) {
   // Safe fallback to first product if none provided
@@ -15,12 +16,22 @@ export default function ProductPage({ product: propProduct, onAddToCart, onNavig
   const [selectedSize, setSelectedSize] = useState(variants[0]?.size || 'standard');
   const [isSubscription, setIsSubscription] = useState(false);
   const [openAccordion, setOpenAccordion] = useState('about'); // 'about' | 'usage' | 'clinical'
+  const [showStickyBar, setShowStickyBar] = useState(false);
 
   useEffect(() => {
     if (variants.length > 0) {
       setSelectedSize(variants[0].size);
     }
   }, [product.id]);
+
+  // ponytail: passive scroll listener for mobile/desktop sticky purchase bar
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowStickyBar(window.scrollY > 480);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const selectedVariant = variants.find(v => v.size === selectedSize) || variants[0];
   const rawPrice = selectedVariant?.price || product.basePrice || 48;
@@ -305,40 +316,19 @@ export default function ProductPage({ product: propProduct, onAddToCart, onNavig
 
           <div className="hims-product-pairings-grid">
             {otherProducts.map((other) => (
-              <div
+              <ProductCard
                 key={other.id}
-                className="hims-basic-card"
-                onClick={() => onNavigateToProduct && onNavigateToProduct(other.id)}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className="basic-card-img-box" style={{ height: 240 }}>
-                  {other.badge && <span className="basic-card-badge">{other.badge}</span>}
-                  <img 
-                    src={other.cutoutImage || other.image} 
-                    alt={other.title} 
-                    className="basic-product-cutout-img" 
-                    loading="lazy" 
-                    decoding="async" 
-                  />
-                </div>
-                <div className="basic-card-info">
-                  <h4 className="basic-card-title" style={{ fontSize: '1.15rem' }}>{other.title}</h4>
-                  <div className="basic-card-price" style={{ fontSize: '0.88rem' }}>${other.basePrice}</div>
-                  <p className="basic-card-text" style={{ minHeight: '3.4em', fontSize: '0.84rem' }}>
-                    {other.subtitle}
-                  </p>
-                  <button
-                    type="button"
-                    className="hims-btn-outline basic-card-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onNavigateToProduct && onNavigateToProduct(other.id);
-                    }}
-                  >
-                    View details
-                  </button>
-                </div>
-              </div>
+                id={other.id}
+                title={other.title}
+                price={`$${other.basePrice}`}
+                desc={other.subtitle}
+                img={other.cutoutImage || other.image}
+                badge={other.badge}
+                imageHeight={240}
+                onClick={onNavigateToProduct}
+                onAction={onNavigateToProduct}
+                actionLabel="View details"
+              />
             ))}
           </div>
         </section>
@@ -385,6 +375,33 @@ export default function ProductPage({ product: propProduct, onAddToCart, onNavig
           ))}
         </div>
       </section>
+
+      {/* Mobile / Scroll Sticky Buy Bar (Single Hero Image Preserved) */}
+      {showStickyBar && (
+        <aside className="hims-sticky-buy-bar" aria-label="Quick purchase bar">
+          <div className="sticky-bar-inner">
+            <div className="sticky-bar-left">
+              <img
+                src={product.cutoutImage || product.image}
+                alt={product.title}
+                className="sticky-bar-thumb"
+              />
+              <div className="sticky-bar-info">
+                <span className="sticky-bar-title">{product.title}</span>
+                <span className="sticky-bar-price">${finalPrice.toFixed(2)}</span>
+              </div>
+            </div>
+            <button
+              type="button"
+              className="hims-btn-black sticky-bar-btn"
+              onClick={handleAdd}
+            >
+              <Zap size={16} fill="#ffffff" />
+              <span>Add to Bag</span>
+            </button>
+          </div>
+        </aside>
+      )}
     </div>
   );
 }

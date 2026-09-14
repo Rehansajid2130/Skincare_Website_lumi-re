@@ -238,12 +238,6 @@ export default function AccountPortal({
               </p>
             </div>
           </div>
-
-          <div className="hims-account-hero-provider">
-            <div className="provider-label">ASSIGNED MEDICAL PROVIDER</div>
-            <div className="provider-name">Dr. Sarah Jenkins, MD</div>
-            <div className="provider-credentials">Board-Certified Dermatologist • CA License #G84920</div>
-          </div>
         </div>
       </div>
 
@@ -684,30 +678,9 @@ export default function AccountPortal({
 
               <div className="profile-spec-card">
                 <span className="spec-label">RECOMMENDED PROTOCOL</span>
-                <h4 className="spec-value">Bedside 3-Step Clinical Regimen</h4>
+                <h4 className="spec-value">Bedside 3-Step Regimen</h4>
                 <p className="spec-sub">
                   Apply 1 pump of Custom Serum nightly after gentle cleansing; seal with Goodnight Wrinkle Cream.
-                </p>
-              </div>
-            </div>
-
-            {/* Dermatologist Consultation Notes */}
-            <div className="hims-doctor-notes-card">
-              <div className="doctor-header-row">
-                <div className="doctor-avatar-circle">SJ</div>
-                <div className="doctor-meta">
-                  <div className="doctor-name">Dr. Sarah Jenkins, MD</div>
-                  <div className="doctor-title">Clinical Medical Review • Lumière Telehealth</div>
-                </div>
-                <div className="doctor-check-pill">
-                  <ShieldCheck size={14} />
-                  <span>Verified Medical Review</span>
-                </div>
-              </div>
-
-              <div className="doctor-notes-body">
-                <p>
-                  "Based on your skin history, Formula LM-924 provides the clinical threshold to reverse fine smile lines while maintaining lipid barrier integrity. If you experience mild dryness during weeks 1–2, alternate application to every other night before advancing to daily use. Always remember to use mineral SPF 30 every morning."
                 </p>
               </div>
             </div>
@@ -882,7 +855,7 @@ export default function AccountPortal({
               <div className="strength-options-list">
                 {[
                   { id: 'Tretinoin 0.018% + Niacinamide 4%', label: 'Gentle Starter (0.018%)', sub: 'For highly sensitive or easily flushed skin' },
-                  { id: 'Tretinoin 0.025% + Niacinamide 4%', label: 'Balanced Standard (0.025%)', sub: 'Current Active Formula • Proven results' },
+                  { id: 'Tretinoin 0.025% + Niacinamide 4%', label: 'Balanced Standard (0.025%)', sub: 'Targeted cellular renewal • Proven results' },
                   { id: 'Tretinoin 0.05% + Niacinamide 4%', label: 'Advanced Strength (0.05%)', sub: 'For skin well-adapted to active retinoids' },
                   { id: 'Tretinoin 0.1% + Niacinamide 4%', label: 'Maximum Clinical (0.1%)', sub: 'Maximum cellular turnover for resistant concerns' }
                 ].map((item) => (
@@ -902,7 +875,7 @@ export default function AccountPortal({
               </div>
 
               <div className="hims-input-group" style={{ marginTop: 16 }}>
-                <label className="hims-input-label">Note for Dr. Sarah Jenkins (Optional):</label>
+                <label className="hims-input-label">Formulation Adjustment Note (Optional):</label>
                 <textarea 
                   className="hims-auth-input"
                   rows={3}
@@ -920,7 +893,7 @@ export default function AccountPortal({
                   style={{ width: '100%' }}
                   disabled={strengthRequested}
                 >
-                  {strengthRequested ? 'Submitting to Dermatologist...' : 'Submit Request for Approval'}
+                  {strengthRequested ? 'Updating Formulation...' : 'Save Formula Adjustment'}
                 </button>
               </div>
             </form>

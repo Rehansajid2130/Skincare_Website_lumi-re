@@ -1,0 +1,46 @@
+/* ==========================================================================
+   MINIMAL LUXURY FOOTER
+   ========================================================================== */
+
+.hims-footer {
+  background: var(--bg-page-alt);
+  border-top: 1px solid var(--border-subtle);
+  padding: 60px 24px 40px;
+}
+
+.hims-footer-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.hims-footer-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.hims-footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  color: var(--text-subtle);
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+  .hims-footer-top,
+  .hims-footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+}

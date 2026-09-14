@@ -3,8 +3,11 @@
 @import './styles/home.css';
 @import './styles/product.css';
 @import './styles/cart.css';
+@import './styles/checkout-modal.css';
+@import './styles/footer.css';
 @import './styles/order-confirmation.css';
 @import './styles/auth.css';
 @import './styles/quiz.css';
 @import './styles/account.css';
 @import './styles/admin.css';
+@import './styles/responsive.css';

@@ -562,3 +562,73 @@
   }
 }
 
+/* AM / PM Daily Treatment Protocol Blueprint */
+.quiz-ampm-protocol-card {
+  background: #FFFFFF;
+  border: 1.5px solid #E7E0D6;
+  border-radius: 18px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ampm-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #1C1917;
+}
+
+.ampm-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.ampm-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #FBF9F5;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #EDE8E1;
+}
+
+.ampm-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  align-self: flex-start;
+}
+
+.ampm-badge.am {
+  background: #FAF0DE;
+  color: #8C6D53;
+}
+
+.ampm-badge.pm {
+  background: #E8E0D5;
+  color: #1C1917;
+}
+
+.ampm-step {
+  font-size: 0.84rem;
+  color: #48433D;
+  line-height: 1.45;
+}
+
+@media (max-width: 640px) {
+  .ampm-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+

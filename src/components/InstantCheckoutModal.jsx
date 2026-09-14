@@ -1,14 +1,25 @@
-// ponytail: 1-Tap checkout sheet simulator highlighting lightning speed vs legacy friction
-import React, { useState } from 'react';
-import { CheckCircle2, ShieldCheck, X, Sparkles, Truck } from 'lucide-react';
+// ponytail: luxury DTC checkout sheet with selectable payment method (Apple Pay, Shop Pay, Card)
+import React, { useState, useEffect } from 'react';
+import { CheckCircle2, ShieldCheck, X, Sparkles, Truck, Lock, CreditCard } from 'lucide-react';
+import AppleIcon from './AppleIcon';
 
-export default function InstantCheckoutModal({ 
-  isOpen, 
-  onClose, 
-  cartItems, 
-  onOrderComplete 
+export default function InstantCheckoutModal({
+  isOpen,
+  onClose,
+  cartItems = [],
+  checkoutMethod: initialMethod = 'apple',
+  onOrderComplete
 }) {
   const [stage, setStage] = useState('review'); // 'review' | 'processing' | 'confirmed'
+  const [selectedMethod, setSelectedMethod] = useState(initialMethod);
+
+  // Sync state whenever modal opens or initialMethod changes
+  useEffect(() => {
+    if (isOpen) {
+      setStage('review');
+      setSelectedMethod(initialMethod || 'apple');
+    }
+  }, [isOpen, initialMethod]);
 
   if (!isOpen) return null;
 
@@ -18,105 +29,202 @@ export default function InstantCheckoutModal({
     setStage('processing');
     setTimeout(() => {
       setStage('confirmed');
-    }, 600);
+    }, 700);
   };
 
   const handleFinish = () => {
     onOrderComplete && onOrderComplete({
       items: cartItems.length > 0 ? [...cartItems] : null,
-      orderNumber: '2939993',
-      total: total
+      orderNumber: 'LUM-' + Math.floor(100000 + Math.random() * 900000),
+      total: total,
+      method: selectedMethod
     });
     setStage('review');
     onClose();
   };
 
   return (
-    <div className="checkout-modal-backdrop">
-      <div className="checkout-sheet">
+    <div className="checkout-modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
+      <div className="checkout-sheet" onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
         <div className="sheet-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: '1.2rem', fontWeight: 800 }}> Pay</span>
-            <span style={{ fontSize: '0.8rem', color: '#6b7280' }}>1-Tap Express Authorization</span>
+          <div className="sheet-title-group">
+            <span className="method-brand-name standard">Secure Checkout</span>
+            <span className="sheet-subtitle">Instant 256-Bit Encrypted Order</span>
           </div>
-          <button 
+          <button
+            type="button"
+            className="sheet-close-btn"
             onClick={onClose}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280' }}
+            aria-label="Close checkout"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
+        {/* STAGE 1: REVIEW & PAYMENT SELECTION */}
         {stage === 'review' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            {/* Express Address Card */}
-            <div style={{ background: '#f8fafc', borderRadius: 12, padding: 16, border: '1px solid #e2e8f0', fontSize: '0.85rem' }}>
-              <div style={{ fontWeight: 700, color: '#1e293b', marginBottom: 4 }}>SHIP TO:</div>
-              <div>Elena Vance</div>
-              <div style={{ color: '#64748b' }}>742 Park Avenue, Suite 12B, New York, NY 10021</div>
-              <div style={{ color: '#059669', fontWeight: 600, marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Truck size={14} />
+          <div className="checkout-body">
+            {/* Delivery Destination */}
+            <div className="checkout-info-card">
+              <div className="info-card-header">
+                <span className="info-card-label">SHIPPING ADDRESS</span>
+                <span className="info-card-edit">Auto-Filled</span>
+              </div>
+              <div className="info-card-name">Elena Rostova</div>
+              <div className="info-card-address">742 Park Avenue, Suite 12B, New York, NY 10021</div>
+              <div className="shipping-badge-pill">
+                <Truck size={13} />
                 <span>FedEx Priority Air (2 Business Days) • FREE</span>
               </div>
             </div>
 
-            {/* Payment Method */}
-            <div style={{ background: '#f8fafc', borderRadius: 12, padding: 16, border: '1px solid #e2e8f0', fontSize: '0.85rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <div style={{ fontWeight: 700 }}>PAY WITH:</div>
-                <div style={{ color: '#64748b' }}>Apple Card (Mastercard •••• 9841)</div>
+            {/* Payment Method Selector */}
+            <div className="checkout-info-card">
+              <div className="info-card-header">
+                <span className="info-card-label">SELECT PAYMENT METHOD</span>
+                <span className="payment-secure-tag">
+                  <Lock size={12} />
+                  <span>Encrypted</span>
+                </span>
               </div>
-              <span style={{ color: '#10b981', fontWeight: 700 }}>Verified</span>
+              
+              <div className="payment-options-grid">
+                {/* Apple Pay Option */}
+                <button
+                  type="button"
+                  className={`payment-option-tile ${selectedMethod === 'apple' ? 'active' : ''}`}
+                  onClick={() => setSelectedMethod('apple')}
+                >
+                  <div className="option-tile-head">
+                    <span className="payment-icon-pill apple">
+                      <AppleIcon size={13} />
+                      <span>Pay</span>
+                    </span>
+                    <span className="option-tile-radio" />
+                  </div>
+                  <div className="option-tile-info">
+                    <div className="payment-title">Apple Pay</div>
+                    <div className="payment-sub">Mastercard •••• 9841</div>
+                  </div>
+                </button>
+
+                {/* Shop Pay Option */}
+                <button
+                  type="button"
+                  className={`payment-option-tile ${selectedMethod === 'shop' ? 'active' : ''}`}
+                  onClick={() => setSelectedMethod('shop')}
+                >
+                  <div className="option-tile-head">
+                    <span className="payment-icon-pill shop">Shop Pay</span>
+                    <span className="option-tile-radio" />
+                  </div>
+                  <div className="option-tile-info">
+                    <div className="payment-title">Shop Pay</div>
+                    <div className="payment-sub">Verified •••• 5120</div>
+                  </div>
+                </button>
+
+                {/* Credit Card Option */}
+                <button
+                  type="button"
+                  className={`payment-option-tile ${selectedMethod === 'card' || selectedMethod === 'standard' ? 'active' : ''}`}
+                  onClick={() => setSelectedMethod('card')}
+                >
+                  <div className="option-tile-head">
+                    <span className="payment-icon-pill standard"><CreditCard size={14} /> Card</span>
+                    <span className="option-tile-radio" />
+                  </div>
+                  <div className="option-tile-info">
+                    <div className="payment-title">Credit Card</div>
+                    <div className="payment-sub">Visa •••• 4022</div>
+                  </div>
+                </button>
+              </div>
             </div>
 
-            {/* Total */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', paddingTop: 10, borderTop: '1px solid #e5e7eb' }}>
-              <span style={{ fontSize: '1.1rem', fontWeight: 700 }}>Total Charge:</span>
-              <span style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a' }}>${total.toFixed(2)}</span>
+            {/* Mini Order Summary */}
+            <div className="checkout-summary-strip">
+              <div className="summary-strip-row">
+                <span>Items Subtotal ({cartItems.reduce((a, b) => a + b.qty, 0)})</span>
+                <span>${total.toFixed(2)}</span>
+              </div>
+              <div className="summary-strip-row">
+                <span>Priority 2-Day Air</span>
+                <span className="free-tag">FREE</span>
+              </div>
+              <div className="summary-strip-total">
+                <span>Total Charge:</span>
+                <span className="total-number">${total.toFixed(2)}</span>
+              </div>
             </div>
 
-            {/* Action */}
-            <button 
-              type="button"
-              className="apple-pay-btn"
-              onClick={handleAuthorize}
-              style={{ width: '100%', padding: '16px', fontSize: '1.05rem' }}
-              id="confirm-apple-pay-btn"
-            >
-              <span>Pay with  Pay</span>
-            </button>
+            {/* Single Action Button adapting to selected method */}
+            {selectedMethod === 'apple' && (
+              <button
+                type="button"
+                className="apple-pay-btn checkout-pay-btn"
+                onClick={handleAuthorize}
+                id="confirm-apple-pay-btn"
+              >
+                <AppleIcon size={18} />
+                <span>Pay with Apple Pay • ${total.toFixed(2)}</span>
+              </button>
+            )}
+
+            {selectedMethod === 'shop' && (
+              <button
+                type="button"
+                className="shop-pay-btn checkout-pay-btn"
+                onClick={handleAuthorize}
+                id="confirm-shop-pay-btn"
+              >
+                <span>Pay with Shop Pay • ${total.toFixed(2)}</span>
+              </button>
+            )}
+
+            {(selectedMethod === 'card' || selectedMethod === 'standard') && (
+              <button
+                type="button"
+                className="cta-button-main checkout-pay-btn"
+                onClick={handleAuthorize}
+                id="confirm-standard-checkout-btn"
+              >
+                <Lock size={16} />
+                <span>Complete Order • ${total.toFixed(2)}</span>
+              </button>
+            )}
           </div>
         )}
 
+        {/* STAGE 2: PROCESSING */}
         {stage === 'processing' && (
           <div className="face-id-indicator">
             <div className="face-id-icon-circle">
               <Sparkles size={32} />
             </div>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 800 }}>Biometric 1-Tap Processing...</h3>
-            <p style={{ fontSize: '0.85rem', color: '#6b7280' }}>Zero redirect • Sub-second serverless authorization</p>
+            <h3 className="processing-title">Authorizing 1-Tap Payment...</h3>
+            <p className="processing-sub">Sub-second biometric tokenization & secure confirmation</p>
           </div>
         )}
 
+        {/* STAGE 3: ORDER CONFIRMED */}
         {stage === 'confirmed' && (
-          <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, padding: '16px 0' }}>
-            <div style={{ color: '#059669' }}>
-              <CheckCircle2 size={64} />
+          <div className="order-confirmed-sheet">
+            <div className="confirmed-icon-circle">
+              <CheckCircle2 size={48} strokeWidth={2.5} />
             </div>
-            <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#111827' }}>Order Confirmed!</h3>
-            <p style={{ fontSize: '0.9rem', color: '#4b5563', maxWidth: 360 }}>
-              Order <strong>#LUM-2026-9812</strong> has been confirmed. Your tracking code and receipt were instantly dispatched to your Apple Pay email.
+            <h3 className="confirmed-title">Order Confirmed!</h3>
+            <p className="confirmed-desc">
+              Your order <strong>#LUM-2026-9812</strong> has been authorized. A receipt and real-time FedEx tracking link were sent to your email.
             </p>
-            <div style={{ background: '#ecfdf5', color: '#065f46', padding: '10px 16px', borderRadius: 8, fontSize: '0.82rem', fontWeight: 600 }}>
-              ⚡ Total Checkout Time: <strong>1.4 seconds</strong> (vs 4.2 mins on legacy)
-            </div>
-            <button 
+
+            <button
               type="button"
-              className="cta-button-main"
+              className="cta-button-main confirmed-finish-btn"
               onClick={handleFinish}
-              style={{ width: '100%', marginTop: 8 }}
             >
-              Continue Browsing
+              View Order
             </button>
           </div>
         )}
