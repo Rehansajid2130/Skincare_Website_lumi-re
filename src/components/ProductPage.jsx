@@ -14,7 +14,8 @@ export default function ProductPage({ product: propProduct, onAddToCart, onNavig
     : [{ size: 'standard', label: 'Standard Size', price: product.basePrice || 48, savings: null }];
 
   const [selectedSize, setSelectedSize] = useState(variants[0]?.size || 'standard');
-  const [isSubscription, setIsSubscription] = useState(false);
+  const [isSubscription, setIsSubscription] = useState(true); // default to subscription to maximize DTC AOV
+  const [subFrequency, setSubFrequency] = useState('Every 30 Days');
   const [openAccordion, setOpenAccordion] = useState('about'); // 'about' | 'usage' | 'clinical'
   const [showStickyBar, setShowStickyBar] = useState(false);
 
@@ -46,6 +47,8 @@ export default function ProductPage({ product: propProduct, onAddToCart, onNavig
       size: selectedSize,
       isSubscription,
       price: finalPrice,
+      originalPrice: rawPrice,
+      frequency: isSubscription ? subFrequency : null,
       image: product.cutoutImage || product.image,
       qty: 1
     });
@@ -142,29 +145,32 @@ export default function ProductPage({ product: propProduct, onAddToCart, onNavig
             className="hims-subscribe-box"
             onClick={() => setIsSubscription(!isSubscription)}
             id="subscribe-save-toggle"
+            style={{ cursor: 'pointer', border: isSubscription ? '2px solid #065f46' : '1px solid #e7e0d6', background: isSubscription ? '#f6fbf9' : '#ffffff' }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <div style={{
                 width: 20,
                 height: 20,
                 borderRadius: '50%',
-                border: '2px solid #1c1917',
+                border: '2px solid #065f46',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: isSubscription ? '#1c1917' : '#ffffff'
+                background: isSubscription ? '#065f46' : '#ffffff'
               }}>
                 {isSubscription && <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#ffffff' }}></div>}
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontWeight: 700, fontSize: '0.88rem' }}>Subscribe & Save</span>
+                  <span style={{ fontWeight: 700, fontSize: '0.88rem', color: isSubscription ? '#065f46' : '#1c1917' }}>
+                    Subscribe & Save
+                  </span>
                   <span style={{ background: '#065f46', color: '#ffffff', fontSize: '0.68rem', fontWeight: 800, padding: '2px 7px', borderRadius: 9999 }}>
                     15% OFF
                   </span>
                 </div>
                 <div style={{ fontSize: '0.74rem', color: '#645f59', marginTop: 2 }}>
-                  Auto-ships every 60 days • Free 2-Day Air • Pause or cancel anytime
+                  Auto-ships {subFrequency.toLowerCase()} • Free 2-Day Air • Pause or cancel anytime
                 </div>
               </div>
             </div>
@@ -173,8 +179,42 @@ export default function ProductPage({ product: propProduct, onAddToCart, onNavig
               <span style={{ fontSize: '1.08rem', fontWeight: 800, color: '#1c1917' }}>
                 ${finalPrice.toFixed(2)}
               </span>
+              <div style={{ fontSize: '0.72rem', color: '#8c867e', textDecoration: 'line-through' }}>
+                ${rawPrice.toFixed(2)}
+              </div>
             </div>
           </div>
+
+          {/* Delivery Frequency Selector (When subscribed) */}
+          {isSubscription && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '10px 0 16px 0', padding: '10px 14px', background: '#f9f8f6', borderRadius: '10px', border: '1px solid #eee7de' }}>
+              <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#554e47' }}>Refill Cadence:</span>
+              <div style={{ display: 'flex', gap: 6 }}>
+                {['Every 30 Days', 'Every 60 Days', 'Every 90 Days'].map(freq => (
+                  <button
+                    key={freq}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSubFrequency(freq);
+                    }}
+                    style={{
+                      border: subFrequency === freq ? '1px solid #065f46' : '1px solid #dcd5cc',
+                      background: subFrequency === freq ? '#065f46' : '#ffffff',
+                      color: subFrequency === freq ? '#ffffff' : '#443e38',
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      padding: '4px 10px',
+                      borderRadius: '6px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {freq.replace('Every ', '')}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Primary CTA Button */}
           <div className="hims-cta-block">

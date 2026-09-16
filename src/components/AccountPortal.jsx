@@ -1,22 +1,22 @@
 // ponytail: luxury DTC subscription & account management portal matching Lumière aesthetic
 import React, { useState, useEffect } from 'react';
-import { 
-  Package, 
-  Calendar, 
-  Clock, 
-  RefreshCw, 
-  ShieldCheck, 
-  Sliders, 
-  Check, 
-  AlertCircle, 
-  Truck, 
-  ChevronRight, 
-  Edit3, 
-  Plus, 
-  User, 
-  MapPin, 
-  CreditCard, 
-  LogOut, 
+import {
+  Package,
+  Calendar,
+  Clock,
+  RefreshCw,
+  ShieldCheck,
+  Sliders,
+  Check,
+  AlertCircle,
+  Truck,
+  ChevronRight,
+  Edit3,
+  Plus,
+  User,
+  MapPin,
+  CreditCard,
+  LogOut,
   ArrowLeft,
   Sparkles,
   ExternalLink,
@@ -32,6 +32,8 @@ export default function AccountPortal({
   currentUser,
   onOpenAuth,
   onLogout,
+  onUpdateUser,
+  onNavigateToAdmin,
   onNavigateToLanding,
   onNavigateToProduct,
   onNavigateToOrder,
@@ -39,13 +41,38 @@ export default function AccountPortal({
   onAddToCart
 }) {
   const [activeTab, setActiveTab] = useState('subscriptions'); // 'subscriptions' | 'orders' | 'skin-profile' | 'settings'
-  
+
+  // Editable Account Profile state
+  const [profileForm, setProfileForm] = useState(() => ({
+    name: currentUser?.name || 'Alex Smith',
+    phone: currentUser?.phone || '(415) 890-2341',
+    email: currentUser?.email || 'alex.smith@example.com',
+    preferredName: currentUser?.preferredName || 'Alex',
+    smsNotifications: currentUser?.smsNotifications !== false,
+    emailConsultations: currentUser?.emailConsultations !== false
+  }));
+
+  // Synchronize with currentUser when updated
+  useEffect(() => {
+    if (currentUser) {
+      setProfileForm(prev => ({
+        ...prev,
+        name: currentUser.name || prev.name,
+        email: currentUser.email || prev.email,
+        phone: currentUser.phone || prev.phone,
+        preferredName: currentUser.preferredName || prev.preferredName,
+        smsNotifications: currentUser.smsNotifications !== undefined ? currentUser.smsNotifications : prev.smsNotifications,
+        emailConsultations: currentUser.emailConsultations !== undefined ? currentUser.emailConsultations : prev.emailConsultations
+      }));
+    }
+  }, [currentUser]);
+
   // Subscription state from localStorage or initial defaults
   const [subscription, setSubscription] = useState(() => {
     try {
       const saved = localStorage.getItem('lumiere_active_subscription');
       if (saved) return JSON.parse(saved);
-    } catch (e) {}
+    } catch (e) { }
     return {
       id: 'sub_lm_92810',
       status: 'Active',
@@ -58,6 +85,16 @@ export default function AccountPortal({
       companionAddons: []
     };
   });
+
+  // Sync latest subscription from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('lumiere_active_subscription');
+      if (saved) {
+        setSubscription(JSON.parse(saved));
+      }
+    } catch (e) {}
+  }, []);
 
   // Modal controls
   const [isSnoozeModalOpen, setIsSnoozeModalOpen] = useState(false);
@@ -75,7 +112,7 @@ export default function AccountPortal({
     try {
       const saved = localStorage.getItem('lumiere_shipping_address');
       if (saved) return JSON.parse(saved);
-    } catch (e) {}
+    } catch (e) { }
     return {
       fullName: currentUser?.name || 'Alex Smith',
       street: '742 Evergreen Terrace, Apt 4B',
@@ -94,11 +131,52 @@ export default function AccountPortal({
     setTimeout(() => setToastMessage(null), 3500);
   };
 
+  const handleSaveProfile = (e) => {
+    e.preventDefault();
+    if (!profileForm.name.trim()) {
+      showToast('Please enter your full name');
+      return;
+    }
+    if (!profileForm.phone.trim()) {
+      showToast('Please enter your contact phone number');
+      return;
+    }
+
+    const updatedUser = {
+      ...(currentUser || {}),
+      name: profileForm.name.trim(),
+      phone: profileForm.phone.trim(),
+      email: profileForm.email.trim(),
+      preferredName: profileForm.preferredName.trim(),
+      smsNotifications: profileForm.smsNotifications,
+      emailConsultations: profileForm.emailConsultations
+    };
+
+    if (onUpdateUser) {
+      onUpdateUser(updatedUser);
+    }
+
+    // Synchronize shipping address name and phone as well
+    setShippingAddress(prev => {
+      const updatedAddr = {
+        ...prev,
+        fullName: profileForm.name.trim(),
+        phone: profileForm.phone.trim()
+      };
+      try {
+        localStorage.setItem('lumiere_shipping_address', JSON.stringify(updatedAddr));
+      } catch (err) {}
+      return updatedAddr;
+    });
+
+    showToast('Account details & phone number updated successfully');
+  };
+
   const saveSubscription = (updated) => {
     setSubscription(updated);
     try {
       localStorage.setItem('lumiere_active_subscription', JSON.stringify(updated));
-    } catch (e) {}
+    } catch (e) { }
   };
 
   // Snooze next delivery by 30 days
@@ -107,7 +185,7 @@ export default function AccountPortal({
     const currentDate = new Date(subscription.nextRefillDate.replace(/(\w+)\s(\d+),\s(\d+)/, '$1 $2, $3'));
     const validDate = isNaN(currentDate.getTime()) ? new Date() : currentDate;
     validDate.setDate(validDate.getDate() + days);
-    
+
     const options = { month: 'long', day: 'numeric', year: 'numeric' };
     const newDateStr = validDate.toLocaleDateString('en-US', options);
 
@@ -176,16 +254,16 @@ export default function AccountPortal({
           </p>
 
           <div className="hims-gateway-actions">
-            <button 
-              type="button" 
+            <button
+              type="button"
               className="hims-btn-black"
               onClick={() => onOpenAuth('login')}
               style={{ width: '100%' }}
             >
               Log in to Account
             </button>
-            <button 
-              type="button" 
+            <button
+              type="button"
               className="hims-btn-outline"
               onClick={() => onOpenAuth('signup')}
               style={{ width: '100%', marginTop: 10 }}
@@ -195,8 +273,8 @@ export default function AccountPortal({
           </div>
 
           <div className="hims-gateway-footer">
-            <button 
-              type="button" 
+            <button
+              type="button"
               className="hims-link-subtle"
               onClick={onNavigateToLanding}
             >
@@ -244,37 +322,37 @@ export default function AccountPortal({
       {/* Tab Navigation Navigation Bar */}
       <div className="hims-account-tabs-nav-bar">
         <div className="hims-account-tabs-inner">
-          <button 
-            type="button" 
+          <button
+            type="button"
             className={`hims-account-tab-btn ${activeTab === 'subscriptions' ? 'active' : ''}`}
             onClick={() => setActiveTab('subscriptions')}
           >
             <RefreshCw size={16} />
             <span>Active Subscriptions</span>
           </button>
-          <button 
-            type="button" 
+          <button
+            type="button"
             className={`hims-account-tab-btn ${activeTab === 'orders' ? 'active' : ''}`}
             onClick={() => setActiveTab('orders')}
           >
             <Package size={16} />
             <span>Order History & Tracking</span>
           </button>
-          <button 
-            type="button" 
+          <button
+            type="button"
             className={`hims-account-tab-btn ${activeTab === 'skin-profile' ? 'active' : ''}`}
             onClick={() => setActiveTab('skin-profile')}
           >
             <Sparkles size={16} />
             <span>Skin Diagnostic Profile</span>
           </button>
-          <button 
-            type="button" 
+          <button
+            type="button"
             className={`hims-account-tab-btn ${activeTab === 'settings' ? 'active' : ''}`}
             onClick={() => setActiveTab('settings')}
           >
             <Sliders size={16} />
-            <span>Shipping & Billing</span>
+            <span>Account Settings</span>
           </button>
         </div>
       </div>
@@ -340,8 +418,8 @@ export default function AccountPortal({
 
               <div className="hims-sub-card-right">
                 <div className="sub-actions-box">
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="hims-btn-black sub-action-btn"
                     onClick={() => setIsSnoozeModalOpen(true)}
                   >
@@ -349,13 +427,13 @@ export default function AccountPortal({
                     <span>Delay / Snooze (+30 Days)</span>
                   </button>
 
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="hims-btn-outline sub-action-btn"
                     onClick={() => setIsStrengthModalOpen(true)}
                   >
                     <Sliders size={16} />
-                    <span>Adjust Formula Strength</span>
+                    <span>Adjust Active Strength</span>
                   </button>
 
                   <div className="frequency-toggle-wrapper">
@@ -374,127 +452,91 @@ export default function AccountPortal({
                     </div>
                   </div>
 
-                  <button 
-                    type="button" 
-                    className="hims-link-danger"
+                  <button
+                    type="button"
+                    className="sub-secondary-link"
                     onClick={() => setIsPauseModalOpen(true)}
                   >
-                    Pause or Cancel Subscription
+                    Manage / Pause Subscription
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Companion Products In Next Delivery */}
-            {subscription.companionAddons && subscription.companionAddons.length > 0 && (
-              <div className="companion-shipment-block">
-                <h4 className="companion-block-title">Additional Items In Your Next Refill ({subscription.nextRefillDate}):</h4>
-                <div className="companion-addons-list">
-                  {subscription.companionAddons.map((item) => (
-                    <div key={item.id} className="companion-addon-chip">
-                      <img src={item.image} alt={item.title} className="chip-img" />
-                      <div className="chip-info">
-                        <span className="chip-title">{item.title}</span>
-                        <span className="chip-price">+${item.price}</span>
-                      </div>
-                      <button 
-                        type="button" 
-                        className="chip-remove-btn"
-                        onClick={() => handleRemoveCompanion(item.id)}
-                        aria-label="Remove item"
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Recommended Companion Refill Add-ons */}
-            <div className="hims-sub-addons-section">
-              <div className="addons-header-row">
-                <h3 className="addons-title">Enhance Your Next Refill Shipment</h3>
-                <span className="addons-tag">Subscriber Exclusive: 20% Off • Ships in Same Box</span>
+            {/* Companion Products Section */}
+            <div className="hims-addons-section">
+              <div className="addons-header">
+                <h4 className="addons-title">Clinical Routine Companions</h4>
+                <p className="addons-sub">
+                  Dermatologist-recommended formulations that synergize with your prescription tretinoin to maximize dermal barrier health.
+                </p>
               </div>
 
               <div className="addons-cards-grid">
-                <div className="addon-product-card">
-                  <div className="addon-img-box">
+                {/* Companion 1 */}
+                <div className="addon-card">
+                  <div className="addon-img-wrap">
                     <img src={creamCutoutImg} alt="Goodnight Wrinkle Cream" className="product-cutout-img" />
                   </div>
-                  <div className="addon-card-details">
-                    <span className="addon-step-label">NIGHT COMPANION</span>
-                    <h4 className="addon-prod-title">Goodnight Wrinkle Cream</h4>
-                    <p className="addon-prod-desc">Locks in moisture barrier and prevents retinoid flaking.</p>
-                    <div className="addon-bottom-row">
-                      <div className="addon-price">$24 <span>$30</span></div>
-                      <button 
-                        type="button" 
+                  <div className="addon-info">
+                    <span className="addon-tag">Moisture Barrier Shield</span>
+                    <h5 className="addon-name">Goodnight Wrinkle Cream</h5>
+                    <p className="addon-desc">Deeply conditions the stratum corneum with squalane and multi-weight hyaluronic acid.</p>
+                    <div className="addon-price-row">
+                      <span className="addon-price">$24</span>
+                      <button
+                        type="button"
                         className="addon-add-btn"
-                        onClick={() => handleAddCompanionToRefill({
-                          id: 'goodnight-wrinkle-cream',
-                          title: 'Goodnight Wrinkle Cream',
-                          price: 24,
-                          image: creamCutoutImg
-                        })}
+                        onClick={() => handleAddCompanion('Goodnight Wrinkle Cream', 24)}
                       >
-                        <Plus size={15} />
-                        <span>Add to Next Refill</span>
+                        <Plus size={14} />
+                        <span>Add to Next Box</span>
                       </button>
                     </div>
                   </div>
                 </div>
 
-                <div className="addon-product-card">
-                  <div className="addon-img-box">
+                {/* Companion 2 */}
+                <div className="addon-card">
+                  <div className="addon-img-wrap">
                     <img src={sunscreenCutoutImg} alt="Daily Mineral Defense SPF 30" className="product-cutout-img" />
                   </div>
-                  <div className="addon-card-details">
-                    <span className="addon-step-label">MORNING DEFENSE</span>
-                    <h4 className="addon-prod-title">Daily Mineral Shield SPF 30</h4>
-                    <p className="addon-prod-desc">Non-greasy, 100% invisible UV shield for retinoid-treated skin.</p>
-                    <div className="addon-bottom-row">
-                      <div className="addon-price">$22 <span>$28</span></div>
-                      <button 
-                        type="button" 
+                  <div className="addon-info">
+                    <span className="addon-tag">Broad Spectrum Defense</span>
+                    <h5 className="addon-name">Daily Mineral SPF 30</h5>
+                    <p className="addon-desc">Invisible mineral protection that guards newly surfaced retinoid-treated cells against UV photoaging.</p>
+                    <div className="addon-price-row">
+                      <span className="addon-price">$26</span>
+                      <button
+                        type="button"
                         className="addon-add-btn"
-                        onClick={() => handleAddCompanionToRefill({
-                          id: 'daily-mineral-defense-spf30',
-                          title: 'Daily Mineral Shield SPF 30',
-                          price: 22,
-                          image: sunscreenCutoutImg
-                        })}
+                        onClick={() => handleAddCompanion('Daily Mineral SPF 30', 26)}
                       >
-                        <Plus size={15} />
-                        <span>Add to Next Refill</span>
+                        <Plus size={14} />
+                        <span>Add to Next Box</span>
                       </button>
                     </div>
                   </div>
                 </div>
 
-                <div className="addon-product-card">
-                  <div className="addon-img-box">
-                    <img src={cleanserCutoutImg} alt="Gentle Squalane Cleanser" className="product-cutout-img" />
+                {/* Companion 3 */}
+                <div className="addon-card">
+                  <div className="addon-img-wrap">
+                    <img src={cleanserCutoutImg} alt="High Tide Squalane Cleanser" className="product-cutout-img" />
                   </div>
-                  <div className="addon-card-details">
-                    <span className="addon-step-label">DAILY CLEANSER</span>
-                    <h4 className="addon-prod-title">Gentle Squalane Cleanser</h4>
-                    <p className="addon-prod-desc">Hydrating non-foaming wash that maintains natural lipids.</p>
-                    <div className="addon-bottom-row">
-                      <div className="addon-price">$18 <span>$24</span></div>
-                      <button 
-                        type="button" 
+                  <div className="addon-info">
+                    <span className="addon-tag">Lipid-Preserving Cleanse</span>
+                    <h5 className="addon-name">High Tide Squalane Cleanser</h5>
+                    <p className="addon-desc">Gentle amino acid wash that rinses surface impurities without compromising natural sebum lipids.</p>
+                    <div className="addon-price-row">
+                      <span className="addon-price">$22</span>
+                      <button
+                        type="button"
                         className="addon-add-btn"
-                        onClick={() => handleAddCompanionToRefill({
-                          id: 'gentle-squalane-cleanser',
-                          title: 'Gentle Squalane Cleanser',
-                          price: 18,
-                          image: cleanserCutoutImg
-                        })}
+                        onClick={() => handleAddCompanion('High Tide Squalane Cleanser', 22)}
                       >
-                        <Plus size={15} />
-                        <span>Add to Next Refill</span>
+                        <Plus size={14} />
+                        <span>Add to Next Box</span>
                       </button>
                     </div>
                   </div>
@@ -504,120 +546,132 @@ export default function AccountPortal({
           </div>
         )}
 
-        {/* TAB 2: ORDER HISTORY & TRACKING */}
+        {/* TAB 2: ORDER HISTORY & LIVE SHIPMENT TRACKING */}
         {activeTab === 'orders' && (
           <div className="hims-account-tab-panel animate-fade-in">
             <div className="panel-header-row">
               <div>
-                <h2 className="panel-section-title">Order History & Shipment Status</h2>
+                <h2 className="panel-section-title">Order History & Shipments</h2>
                 <p className="panel-section-desc">
-                  Review all previous shipments, track live 2-Day Air deliveries, and view invoices.
+                  View tracking details, delivery receipts, and compounding batch codes for all your previous formulations.
                 </p>
               </div>
             </div>
 
             <div className="hims-orders-list">
-              {/* Order 1: Most recent active */}
+              {/* Order 1: Most recent shipment */}
               <div className="hims-order-card">
                 <div className="order-card-header">
                   <div className="order-meta-col">
-                    <span className="order-number-label">ORDER #2939993</span>
-                    <span className="order-date-text">Placed September 9, 2026</span>
+                    <span className="meta-label">ORDER PLACED</span>
+                    <span className="meta-val">September 12, 2026</span>
+                  </div>
+                  <div className="order-meta-col">
+                    <span className="meta-label">ORDER NUMBER</span>
+                    <span className="meta-val font-mono">#LM-92841</span>
+                  </div>
+                  <div className="order-meta-col">
+                    <span className="meta-label">TOTAL</span>
+                    <span className="meta-val">$48.00</span>
                   </div>
                   <div className="order-status-badge in-transit">
                     <Truck size={14} />
-                    <span>In Transit • Arriving Tomorrow</span>
+                    <span>In Transit • Arriving Friday</span>
+                  </div>
+                </div>
+
+                <div className="order-tracking-strip">
+                  <div className="tracking-progress-bar">
+                    <div className="progress-fill" style={{ width: '75%' }}></div>
+                  </div>
+                  <div className="tracking-steps-row">
+                    <span className="step-item done">Compounded</span>
+                    <span className="step-item done">Quality Checked</span>
+                    <span className="step-item active">Out with Courier</span>
+                    <span className="step-item">Delivered</span>
                   </div>
                 </div>
 
                 <div className="order-card-body">
-                  <div className="order-items-preview">
+                  <div className="order-items-row">
                     <div className="order-item-thumb">
                       <img src={serumCutoutImg} alt="Custom Serum" />
-                      <div className="order-thumb-details">
+                      <div>
                         <div className="thumb-title">Custom Anti-Aging Serum (30ml)</div>
-                        <div className="thumb-sub">Rx Formula #LM-924 • Monthly Subscription</div>
+                        <div className="thumb-sub">Formula #LM-924 • Tretinoin 0.025% + Niacinamide 4%</div>
                       </div>
                     </div>
-
-                    <div className="order-item-thumb">
-                      <img src={creamCutoutImg} alt="Goodnight Wrinkle Cream" />
-                      <div className="order-thumb-details">
-                        <div className="thumb-title">Goodnight Wrinkle Cream (50ml)</div>
-                        <div className="thumb-sub">Barrier Recovery Step • Auto-Delivery</div>
-                      </div>
+                    <div className="order-pricing-summary">
+                      <div className="pricing-line">$48.00</div>
+                      <div className="shipping-line">Carrier: FedEx 2-Day Air (#928190241)</div>
                     </div>
-                  </div>
-
-                  <div className="order-pricing-summary">
-                    <div className="pricing-line">
-                      <span>Total Paid:</span>
-                      <strong>$72.00</strong>
-                    </div>
-                    <div className="shipping-line">Paid with Apple Pay • Free 2-Day Air</div>
                   </div>
                 </div>
 
                 <div className="order-card-footer">
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="hims-btn-black order-action-btn"
                     onClick={() => {
-                      if (onNavigateToOrder) onNavigateToOrder();
+                      if (onNavigateToOrder) {
+                        onNavigateToOrder();
+                      }
                     }}
                   >
-                    <Truck size={15} />
-                    <span>Track 2-Day Air Shipment</span>
+                    View Live Tracking Details
                   </button>
-
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="hims-btn-outline order-action-btn"
-                    onClick={() => showToast('Receipt #2939993 downloaded to device')}
+                    onClick={() => showToast('Order invoice downloaded')}
                   >
                     Download Invoice (PDF)
                   </button>
                 </div>
               </div>
 
-              {/* Order 2: Past shipment */}
+              {/* Order 2: Prior Delivery */}
               <div className="hims-order-card">
                 <div className="order-card-header">
                   <div className="order-meta-col">
-                    <span className="order-number-label">ORDER #2819441</span>
-                    <span className="order-date-text">Delivered August 9, 2026</span>
+                    <span className="meta-label">ORDER PLACED</span>
+                    <span className="meta-val">August 12, 2026</span>
+                  </div>
+                  <div className="order-meta-col">
+                    <span className="meta-label">ORDER NUMBER</span>
+                    <span className="meta-val font-mono">#LM-84192</span>
+                  </div>
+                  <div className="order-meta-col">
+                    <span className="meta-label">TOTAL</span>
+                    <span className="meta-val">$72.00</span>
                   </div>
                   <div className="order-status-badge delivered">
-                    <Check size={14} strokeWidth={3} />
-                    <span>Delivered & Verified</span>
+                    <Check size={14} />
+                    <span>Delivered • August 15, 2026</span>
                   </div>
                 </div>
 
                 <div className="order-card-body">
-                  <div className="order-items-preview">
+                  <div className="order-items-row">
                     <div className="order-item-thumb">
                       <img src={serumCutoutImg} alt="Custom Serum" />
-                      <div className="order-thumb-details">
-                        <div className="thumb-title">Custom Anti-Aging Serum (30ml)</div>
-                        <div className="thumb-sub">Initial Diagnostic Starter Set</div>
+                      <div>
+                        <div className="thumb-title">Custom Anti-Aging Serum (30ml) + Goodnight Wrinkle Cream</div>
+                        <div className="thumb-sub">Formula #LM-924 • Clinical 2-Step Night Set</div>
                       </div>
                     </div>
-                  </div>
-
-                  <div className="order-pricing-summary">
-                    <div className="pricing-line">
-                      <span>Total Paid:</span>
-                      <strong>$48.00</strong>
+                    <div className="order-pricing-summary">
+                      <div className="pricing-line">$72.00</div>
+                      <div className="shipping-line">Delivered to Front Door</div>
                     </div>
-                    <div className="shipping-line">Free 2-Day Air Delivery</div>
                   </div>
                 </div>
 
                 <div className="order-card-footer">
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="hims-btn-outline order-action-btn"
-                    onClick={() => showToast('Receipt #2819441 downloaded to device')}
+                    onClick={() => showToast('Order invoice downloaded')}
                   >
                     Download Invoice (PDF)
                   </button>
@@ -638,8 +692,8 @@ export default function AccountPortal({
                 </p>
               </div>
 
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="hims-btn-outline"
                 onClick={() => {
                   if (onOpenQuiz) onOpenQuiz();
@@ -687,19 +741,203 @@ export default function AccountPortal({
           </div>
         )}
 
-        {/* TAB 4: SHIPPING & BILLING SETTINGS */}
+        {/* TAB 4: ACCOUNT SETTINGS, PROFILE & ADMIN PANEL */}
         {activeTab === 'settings' && (
           <div className="hims-account-tab-panel animate-fade-in">
             <div className="panel-header-row">
               <div>
-                <h2 className="panel-section-title">Shipping & Payment Settings</h2>
+                <h2 className="panel-section-title">Account Settings & Operations</h2>
                 <p className="panel-section-desc">
-                  Manage your verified delivery address, payment methods, and account security.
+                  Manage your personal account profile, contact number, communication preferences, staff admin studio, and billing.
                 </p>
               </div>
             </div>
 
+            {/* Top Priority: Staff / Store Operations Card (The requested Admin Panel button) */}
+            <div className="hims-admin-access-card">
+              <div className="admin-access-left">
+                <div className="admin-access-badge-row">
+                  <span className="admin-staff-badge">
+                    <ShieldCheck size={13} />
+                    <span>Store Operations</span>
+                  </span>
+                  <span className="admin-active-status">Privileged Access</span>
+                </div>
+                <h3 className="admin-access-title">Lumière Admin & Inventory Studio</h3>
+                <p className="admin-access-desc">
+                  Access catalog management, product cutout studio, inventory stock tracking, and real-time sales telemetry.
+                </p>
+                <div className="admin-feature-tags">
+                  <span className="feature-tag">Catalog CMS</span>
+                  <span className="feature-tag">Photo Studio Cutouts</span>
+                  <span className="feature-tag">Stock & Pricing Controls</span>
+                  <span className="feature-tag">Telemetry Analytics</span>
+                </div>
+              </div>
+
+              <div className="admin-access-right">
+                <button
+                  type="button"
+                  className="hims-btn-black admin-launch-btn"
+                  onClick={() => {
+                    if (onNavigateToAdmin) {
+                      onNavigateToAdmin();
+                    }
+                  }}
+                  id="account-admin-panel-btn"
+                >
+                  <Sliders size={16} />
+                  <span>Open Admin Panel</span>
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+
             <div className="hims-settings-grid">
+              {/* Profile Information & Contact Details Card */}
+              <div className="hims-settings-card hims-profile-edit-card">
+                <div className="settings-card-header">
+                  <div className="settings-header-left">
+                    <User size={18} color="#8C6D53" />
+                    <h3 className="settings-card-title">Personal Profile & Contact Info</h3>
+                  </div>
+                  <span className="address-tag">Verified Member</span>
+                </div>
+
+                <form onSubmit={handleSaveProfile} className="settings-card-body">
+                  <div className="profile-form-grid">
+                    <div className="profile-input-group">
+                      <label htmlFor="account-full-name" className="profile-label">
+                        Full Name <span className="req-star">*</span>
+                      </label>
+                      <input
+                        id="account-full-name"
+                        type="text"
+                        className="profile-input"
+                        value={profileForm.name}
+                        onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
+                        placeholder="e.g. Alex Smith"
+                        required
+                      />
+                    </div>
+
+                    <div className="profile-input-group">
+                      <label htmlFor="account-phone-number" className="profile-label">
+                        Phone Number <span className="req-star">*</span>
+                      </label>
+                      <input
+                        id="account-phone-number"
+                        type="tel"
+                        className="profile-input"
+                        value={profileForm.phone}
+                        onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
+                        placeholder="e.g. (415) 890-2341"
+                        required
+                      />
+                      <span className="input-hint">Used for carrier tracking & automated refill SMS alerts</span>
+                    </div>
+
+                    <div className="profile-input-group">
+                      <label htmlFor="account-email-address" className="profile-label">
+                        Email Address
+                      </label>
+                      <input
+                        id="account-email-address"
+                        type="email"
+                        className="profile-input"
+                        value={profileForm.email}
+                        onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
+                        placeholder="yourname@domain.com"
+                      />
+                    </div>
+
+                    <div className="profile-input-group">
+                      <label htmlFor="account-preferred-name" className="profile-label">
+                        Preferred Name / Salutation
+                      </label>
+                      <input
+                        id="account-preferred-name"
+                        type="text"
+                        className="profile-input"
+                        value={profileForm.preferredName}
+                        onChange={(e) => setProfileForm({ ...profileForm, preferredName: e.target.value })}
+                        placeholder="e.g. Alex"
+                      />
+                      <span className="input-hint">Printed on your personalized prescription bottle label</span>
+                    </div>
+                  </div>
+
+                  <div className="profile-save-action-row">
+                    <button
+                      type="submit"
+                      className="hims-btn-black profile-save-btn"
+                    >
+                      <Check size={16} strokeWidth={2.5} />
+                      <span>Save Profile Changes</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              {/* Notification & Care Alerts Card */}
+              <div className="hims-settings-card">
+                <div className="settings-card-header">
+                  <div className="settings-header-left">
+                    <Sparkles size={18} color="#8C6D53" />
+                    <h3 className="settings-card-title">Communication & Alerts</h3>
+                  </div>
+                  <span className="address-tag">Automated</span>
+                </div>
+
+                <div className="settings-card-body">
+                  <p style={{ color: '#665f57', fontSize: '0.88rem', margin: '0 0 16px', lineHeight: 1.45 }}>
+                    Configure how our clinical pharmacy and care team connect with you regarding active treatments.
+                  </p>
+
+                  <div className="notification-toggles-list">
+                    <label className="notif-toggle-item">
+                      <input
+                        type="checkbox"
+                        checked={profileForm.smsNotifications}
+                        onChange={(e) => {
+                          const val = e.target.checked;
+                          setProfileForm(prev => ({ ...prev, smsNotifications: val }));
+                          if (onUpdateUser) {
+                            onUpdateUser({ ...(currentUser || {}), ...profileForm, smsNotifications: val });
+                          }
+                          showToast(val ? 'SMS refill alerts enabled' : 'SMS refill alerts paused');
+                        }}
+                        className="notif-checkbox"
+                      />
+                      <div className="notif-toggle-text">
+                        <strong>SMS Refill Reminders</strong>
+                        <span>Receive SMS notifications 3 days before your formula compound ships</span>
+                      </div>
+                    </label>
+
+                    <label className="notif-toggle-item">
+                      <input
+                        type="checkbox"
+                        checked={profileForm.emailConsultations}
+                        onChange={(e) => {
+                          const val = e.target.checked;
+                          setProfileForm(prev => ({ ...prev, emailConsultations: val }));
+                          if (onUpdateUser) {
+                            onUpdateUser({ ...(currentUser || {}), ...profileForm, emailConsultations: val });
+                          }
+                          showToast(val ? 'Dermatology check-ins enabled' : 'Dermatology check-ins paused');
+                        }}
+                        className="notif-checkbox"
+                      />
+                      <div className="notif-toggle-text">
+                        <strong>Provider Clinical Check-Ins</strong>
+                        <span>Quarterly medical assessments & active strength adjustment invitations</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
               {/* Shipping Address Card */}
               <div className="hims-settings-card">
                 <div className="settings-card-header">
@@ -707,8 +945,8 @@ export default function AccountPortal({
                     <MapPin size={18} color="#8C6D53" />
                     <h3 className="settings-card-title">Default Shipping Address</h3>
                   </div>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="settings-edit-btn"
                     onClick={() => setIsAddressModalOpen(true)}
                   >
@@ -733,10 +971,10 @@ export default function AccountPortal({
                     <CreditCard size={18} color="#8C6D53" />
                     <h3 className="settings-card-title">Payment & Billing</h3>
                   </div>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="settings-edit-btn"
-                    onClick={() => showToast('Payment details updated securely')}
+                    onClick={() => showToast('Payment method encrypted & updated')}
                   >
                     <Edit3 size={15} />
                     <span>Update</span>
@@ -755,14 +993,14 @@ export default function AccountPortal({
             </div>
 
             {/* Logout Row */}
-            <div className="hims-settings-logout-box">
+            <div className="hims-settings-logout-box" style={{ marginTop: 24 }}>
               <div>
                 <h4 className="logout-title">Account Session</h4>
                 <p className="logout-sub">Logged in as {currentUser.email}</p>
               </div>
 
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="hims-btn-outline"
                 onClick={() => {
                   onLogout();
@@ -771,7 +1009,7 @@ export default function AccountPortal({
                 style={{ color: '#dc2626', borderColor: '#fca5a5' }}
               >
                 <LogOut size={16} />
-                <span>Log Out of Lumière</span>
+                <span>Log Out</span>
               </button>
             </div>
           </div>
@@ -785,8 +1023,8 @@ export default function AccountPortal({
           <div className="hims-account-modal-card animate-fade-in">
             <div className="modal-header">
               <h3 className="modal-title">Reschedule Next Refill</h3>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="modal-close-btn"
                 onClick={() => setIsSnoozeModalOpen(false)}
               >
@@ -800,8 +1038,8 @@ export default function AccountPortal({
               </p>
 
               <div className="modal-snooze-options">
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="snooze-choice-btn"
                   onClick={() => handleSnoozeDelivery(14)}
                 >
@@ -809,8 +1047,8 @@ export default function AccountPortal({
                   <ChevronRight size={16} />
                 </button>
 
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="snooze-choice-btn recommended"
                   onClick={() => handleSnoozeDelivery(30)}
                 >
@@ -818,8 +1056,8 @@ export default function AccountPortal({
                   <span className="badge">Most Popular</span>
                 </button>
 
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="snooze-choice-btn"
                   onClick={() => handleSnoozeDelivery(60)}
                 >
@@ -838,8 +1076,8 @@ export default function AccountPortal({
           <div className="hims-account-modal-card animate-fade-in">
             <div className="modal-header">
               <h3 className="modal-title">Request Formula Strength Change</h3>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="modal-close-btn"
                 onClick={() => setIsStrengthModalOpen(false)}
               >
@@ -860,8 +1098,8 @@ export default function AccountPortal({
                   { id: 'Tretinoin 0.1% + Niacinamide 4%', label: 'Maximum Clinical (0.1%)', sub: 'Maximum cellular turnover for resistant concerns' }
                 ].map((item) => (
                   <label key={item.id} className={`strength-option-label ${selectedStrength === item.id ? 'selected' : ''}`}>
-                    <input 
-                      type="radio" 
+                    <input
+                      type="radio"
                       name="strength"
                       checked={selectedStrength === item.id}
                       onChange={() => setSelectedStrength(item.id)}
@@ -876,7 +1114,7 @@ export default function AccountPortal({
 
               <div className="hims-input-group" style={{ marginTop: 16 }}>
                 <label className="hims-input-label">Formulation Adjustment Note (Optional):</label>
-                <textarea 
+                <textarea
                   className="hims-auth-input"
                   rows={3}
                   placeholder="e.g. My skin has adapted completely without any dryness over the last 6 weeks."
@@ -887,9 +1125,9 @@ export default function AccountPortal({
               </div>
 
               <div className="modal-footer-actions">
-                <button 
-                  type="submit" 
-                  className="hims-btn-black" 
+                <button
+                  type="submit"
+                  className="hims-btn-black"
                   style={{ width: '100%' }}
                   disabled={strengthRequested}
                 >
@@ -907,8 +1145,8 @@ export default function AccountPortal({
           <div className="hims-account-modal-card animate-fade-in">
             <div className="modal-header">
               <h3 className="modal-title">Pause or Cancel Plan</h3>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="modal-close-btn"
                 onClick={() => setIsPauseModalOpen(false)}
               >
@@ -922,8 +1160,8 @@ export default function AccountPortal({
               </p>
 
               <div className="modal-snooze-options">
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="snooze-choice-btn recommended"
                   onClick={() => {
                     handleSnoozeDelivery(60);
@@ -934,8 +1172,8 @@ export default function AccountPortal({
                   <span className="badge">Recommended</span>
                 </button>
 
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="snooze-choice-btn"
                   onClick={() => {
                     handleSnoozeDelivery(90);
@@ -946,8 +1184,8 @@ export default function AccountPortal({
                   <ChevronRight size={16} />
                 </button>
 
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="hims-link-danger"
                   style={{ textAlign: 'center', display: 'block', margin: '18px auto 0' }}
                   onClick={() => {
@@ -971,8 +1209,8 @@ export default function AccountPortal({
           <div className="hims-account-modal-card animate-fade-in">
             <div className="modal-header">
               <h3 className="modal-title">Edit Shipping Address</h3>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="modal-close-btn"
                 onClick={() => setIsAddressModalOpen(false)}
               >
@@ -980,22 +1218,22 @@ export default function AccountPortal({
               </button>
             </div>
 
-            <form 
+            <form
               onSubmit={(e) => {
                 e.preventDefault();
                 try {
                   localStorage.setItem('lumiere_shipping_address', JSON.stringify(shippingAddress));
-                } catch (err) {}
+                } catch (err) { }
                 setIsAddressModalOpen(false);
                 showToast('Shipping address updated');
-              }} 
+              }}
               className="modal-body"
             >
               <div className="hims-input-group">
                 <label className="hims-input-label">Full Name</label>
-                <input 
-                  type="text" 
-                  className="hims-auth-input" 
+                <input
+                  type="text"
+                  className="hims-auth-input"
                   value={shippingAddress.fullName}
                   onChange={(e) => setShippingAddress({ ...shippingAddress, fullName: e.target.value })}
                   required
@@ -1004,9 +1242,9 @@ export default function AccountPortal({
 
               <div className="hims-input-group">
                 <label className="hims-input-label">Street Address</label>
-                <input 
-                  type="text" 
-                  className="hims-auth-input" 
+                <input
+                  type="text"
+                  className="hims-auth-input"
                   value={shippingAddress.street}
                   onChange={(e) => setShippingAddress({ ...shippingAddress, street: e.target.value })}
                   required
@@ -1016,9 +1254,9 @@ export default function AccountPortal({
               <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1.5fr', gap: 10 }}>
                 <div className="hims-input-group">
                   <label className="hims-input-label">City</label>
-                  <input 
-                    type="text" 
-                    className="hims-auth-input" 
+                  <input
+                    type="text"
+                    className="hims-auth-input"
                     value={shippingAddress.city}
                     onChange={(e) => setShippingAddress({ ...shippingAddress, city: e.target.value })}
                     required
@@ -1026,9 +1264,9 @@ export default function AccountPortal({
                 </div>
                 <div className="hims-input-group">
                   <label className="hims-input-label">State</label>
-                  <input 
-                    type="text" 
-                    className="hims-auth-input" 
+                  <input
+                    type="text"
+                    className="hims-auth-input"
                     value={shippingAddress.state}
                     onChange={(e) => setShippingAddress({ ...shippingAddress, state: e.target.value })}
                     required
@@ -1036,9 +1274,9 @@ export default function AccountPortal({
                 </div>
                 <div className="hims-input-group">
                   <label className="hims-input-label">ZIP Code</label>
-                  <input 
-                    type="text" 
-                    className="hims-auth-input" 
+                  <input
+                    type="text"
+                    className="hims-auth-input"
                     value={shippingAddress.zip}
                     onChange={(e) => setShippingAddress({ ...shippingAddress, zip: e.target.value })}
                     required

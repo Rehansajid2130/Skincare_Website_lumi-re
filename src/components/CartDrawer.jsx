@@ -1,6 +1,5 @@
-// ponytail: airy, spacious luxury DTC cart drawer with smooth steppers and 1-tap express checkout
 import React from 'react';
-import { X, Trash2, ShieldCheck, ArrowRight, Sparkles, Lock } from 'lucide-react';
+import { X, Trash2, ShieldCheck, ArrowRight, Sparkles, Lock, RefreshCw } from 'lucide-react';
 import { PRODUCTS } from '../data/products';
 import AppleIcon from './AppleIcon';
 
@@ -10,8 +9,11 @@ export default function CartDrawer({
   cartItems,
   onUpdateQty,
   onRemoveItem,
+  onToggleSubscription,
+  onUpdateFrequency,
   onTriggerCheckout,
-  onAddToCart
+  onAddToCart,
+  onNavigateToCatalog
 }) {
   if (!isOpen) return null;
 
@@ -58,7 +60,12 @@ export default function CartDrawer({
               <button
                 type="button"
                 className="hims-btn-black cart-empty-btn"
-                onClick={onClose}
+                onClick={() => {
+                  onClose();
+                  if (onNavigateToCatalog) {
+                    onNavigateToCatalog('All');
+                  }
+                }}
               >
                 Shop Formulations
               </button>
@@ -88,7 +95,41 @@ export default function CartDrawer({
 
                       <div className="cart-item-meta">
                         <span>{item.size}</span>
-                        {item.isSubscription && <span className="cart-sub-tag">15% Off Auto-Ship</span>}
+                        {item.isSubscription ? (
+                          <span className="cart-sub-tag">15% Off Auto-Ship Active</span>
+                        ) : (
+                          <span className="cart-meta-tag">One-Time Order</span>
+                        )}
+                      </div>
+
+                      {/* Interactive Auto-Ship Toggle */}
+                      <div className="cart-sub-action-bar">
+                        <button
+                          type="button"
+                          className={`cart-sub-switch ${item.isSubscription ? 'active' : ''}`}
+                          onClick={() => onToggleSubscription && onToggleSubscription(item.id)}
+                          title="Click to toggle between auto-ship subscription and one-time order"
+                        >
+                          <span className={`sub-switch-radio ${item.isSubscription ? 'checked' : ''}`}>
+                            {item.isSubscription && <span className="radio-inner-dot" />}
+                          </span>
+                          <span className="sub-switch-text">
+                            {item.isSubscription ? 'Subscribed (15% Off)' : 'Subscribe & Save 15%'}
+                          </span>
+                        </button>
+
+                        {item.isSubscription && (
+                          <select
+                            className="cart-freq-dropdown"
+                            value={item.frequency || 'Every 30 Days'}
+                            onChange={(e) => onUpdateFrequency && onUpdateFrequency(item.id, e.target.value)}
+                            aria-label="Refill Frequency"
+                          >
+                            <option value="Every 30 Days">Every 30 Days</option>
+                            <option value="Every 60 Days">Every 60 Days</option>
+                            <option value="Every 90 Days">Every 90 Days</option>
+                          </select>
+                        )}
                       </div>
 
                       <div className="cart-item-bottom">

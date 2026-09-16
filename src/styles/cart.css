@@ -227,6 +227,88 @@
   font-size: 0.68rem;
 }
 
+.cart-meta-tag {
+  background: #F3F4F6;
+  color: #4B5563;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  font-size: 0.68rem;
+}
+
+/* Subscription Action Bar */
+.cart-sub-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 6px 0;
+  padding: 5px 8px;
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+}
+
+.cart-sub-switch {
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  font-family: inherit;
+}
+
+.sub-switch-radio {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #9CA3AF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #FFFFFF;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.cart-sub-switch.active .sub-switch-radio {
+  border-color: #059669;
+  background: #059669;
+}
+
+.radio-inner-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #FFFFFF;
+}
+
+.sub-switch-text {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.cart-sub-switch.active .sub-switch-text {
+  color: #065F46;
+}
+
+.cart-freq-dropdown {
+  background: #FFFFFF;
+  border: 1px solid #D1D5DB;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #111827;
+  padding: 2px 6px;
+  outline: none;
+  cursor: pointer;
+}
+
+
 .cart-item-bottom {
   display: flex;
   justify-content: space-between;

@@ -1,7 +1,7 @@
 // ponytail: clean warm aesthetic footer matching Hims design without external watermark bars
 import React from 'react';
 
-export default function Footer({ onNavigateToProductPage, onNavigateToLanding, onNavigateToAdmin }) {
+export default function Footer({ onNavigateToProductPage, onNavigateToCatalog, onNavigateToLanding, onNavigateToAdmin }) {
   return (
     <footer className="hims-footer">
       <div className="hims-footer-inner">
@@ -17,9 +17,10 @@ export default function Footer({ onNavigateToProductPage, onNavigateToLanding, o
           </button>
           <div style={{ display: 'flex', gap: 24, fontSize: '0.9rem', fontWeight: 600 }}>
             <button type="button" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', font: 'inherit' }} onClick={onNavigateToLanding}>Treatments</button>
+            <button type="button" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', font: 'inherit' }} onClick={onNavigateToCatalog || onNavigateToProductPage}>Products</button>
             <button type="button" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', font: 'inherit' }} onClick={onNavigateToProductPage}>Formulations</button>
             <button type="button" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', font: 'inherit' }} onClick={onNavigateToProductPage}>Science</button>
-            <span style={{ color: 'inherit' }}>Important Safety Information</span>
+            <span style={{ color: 'inherit' }}>Safety Info</span>
           </div>
         </div>
 

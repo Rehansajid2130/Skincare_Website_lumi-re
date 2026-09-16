@@ -96,6 +96,10 @@
     display: none;
   }
 
+  .hims-header-search-form {
+    display: none;
+  }
+
   .hims-mobile-menu-btn {
     display: flex;
     align-items: center;

@@ -1,4 +1,3 @@
-// ponytail: shared modern products dataset matching DTC cosmetics catalog with background-removed cutouts
 import serumCutoutImg from '../assets/serum_cutout.png';
 import creamCutoutImg from '../assets/cream_cutout.png';
 import vitamincCutoutImg from '../assets/vitaminc_cutout.png';
@@ -6,6 +5,12 @@ import moisturizerCutoutImg from '../assets/moisturizer_cutout.png';
 import cleanserCutoutImg from '../assets/cleanser_cutout.png';
 import sunscreenCutoutImg from '../assets/sunscreen_cutout.png';
 import rxCreamCutoutImg from '../assets/rx_cream_cutout.png';
+
+import eyeCreamImg from '../assets/eye_cream.jpg';
+import essenceMistImg from '../assets/essence_mist.jpg';
+import retinolElixirImg from '../assets/retinol_elixir.jpg';
+import sunDropsImg from '../assets/sun_drops.jpg';
+import bhaCleanserImg from '../assets/bha_cleanser.jpg';
 
 export const PRODUCTS = [
   {
@@ -326,6 +331,232 @@ export const PRODUCTS = [
     howToUse: 'Apply a pea-sized amount to completely dry skin at night, 2-3 times per week initially, building up to nightly use as tolerated.',
     inStock: true,
     shipsIn: 'Prescribed online • Free 2-Day Air delivery'
+  },
+  {
+    id: 'firming-peptide-eye-cream',
+    title: 'Peptide Radiance Eye Cream',
+    subtitle: 'Bio-Fermented Tri-Peptide, Caffeine & Micro-Circulation Complex',
+    category: 'Creams',
+    badge: 'Clinically Proven',
+    rating: 4.9,
+    reviewCount: 820,
+    image: eyeCreamImg,
+    cutoutImage: eyeCreamImg,
+    basePrice: 32,
+    activeFormula: 'Tri-Peptide Complex 4.0% • Micro-Caffeine 2.5% • Botanical Squalane 3.0%',
+    variants: [
+      { size: '15ml', label: 'Standard Jar (15ml)', price: 32, savings: null },
+      { size: '30ml', label: 'Value Duo (30ml)', price: 52, savings: 'Save 18%' }
+    ],
+    highlights: [
+      'Micro-circulation caffeine reduces stubborn morning puffiness',
+      'Signaling peptides lift and tighten thin eyelid skin',
+      'Reflects light to visibly blur under-eye shadow circles',
+      'Ophthalmologist and dermatologist tested for sensitive eyes'
+    ],
+    benefitsChecklist: [
+      {
+        heading: 'Depuffs and tightens under-eye bags',
+        desc: 'Encapsulated caffeine drains excess fluids and activates micro-circulation within 15 minutes of application.'
+      },
+      {
+        heading: 'Lifts hooded eyelids & smooths crow’s feet',
+        desc: 'Tri-peptide fermentation stimulates natural elastin and collagen synthesis along orbital tissue.'
+      },
+      {
+        heading: 'Brightens dark circles',
+        desc: 'Botanical squalane and licorice extract nourish thin skin barriers and diffuse discoloration.'
+      }
+    ],
+    clinical: [
+      { percent: '97%', text: 'Reported visible reduction in morning puffiness' },
+      { percent: '93%', text: 'Saw measurable softening of crow’s feet in 2 weeks' },
+      { percent: '96%', text: 'Experienced brighter, more awake eye contours' }
+    ],
+    description: 'A clinical micro-circulation eye treatment formulated to target dark circles, fluid retention, and crow’s feet with bio-fermented peptides and caffeine.',
+    howToUse: 'Gently tap a rice-grain amount along the orbital bone using your ring finger every morning and night.',
+    inStock: true,
+    shipsIn: 'Same-day Dispatch • Free 2-Day Air'
+  },
+  {
+    id: 'aura-essence-mist',
+    title: 'Hydra-Glow Essence Mist',
+    subtitle: 'Fermented Galactomyces, Ectoin & Bio-Lipid Cellular Recovery Mist',
+    category: 'Moisturizers',
+    badge: 'Bestseller',
+    rating: 4.8,
+    reviewCount: 640,
+    image: essenceMistImg,
+    cutoutImage: essenceMistImg,
+    basePrice: 28,
+    activeFormula: 'Fermented Galactomyces 5.0% • Ectoin 1.5% • Rosewater Hydrosol 25%',
+    variants: [
+      { size: '100ml', label: 'Standard Mist (100ml)', price: 28, savings: null },
+      { size: '200ml', label: 'Jumbo Refill (200ml)', price: 46, savings: 'Save 18%' }
+    ],
+    highlights: [
+      'Delivers micro-droplet cellular hydration in seconds',
+      'Galactomyces bio-ferment restores youthful skin glow',
+      'Shields moisture barrier against digital blue light stress',
+      'Sets makeup and refreshes dry skin throughout the day'
+    ],
+    benefitsChecklist: [
+      {
+        heading: 'Instant cellular barrier revival',
+        desc: 'Micro-fine atomizer deposits billions of hydrating bio-lipid droplets deep into dehydrated surface layers.'
+      },
+      {
+        heading: 'Soothes heated, stressed skin',
+        desc: 'Ectoin and organic rosewater immediately reduce erythema, flushing, and environmental tightness.'
+      },
+      {
+        heading: 'Enhances subsequent serum absorption',
+        desc: 'Damp skin absorbs serums and active concentrates up to 4x deeper when applied after this essence.'
+      }
+    ],
+    clinical: [
+      { percent: '99%', text: 'Agreed skin felt instantly refreshed and quenched' },
+      { percent: '95%', text: 'Noticed improved makeup longevity and natural radiance' }
+    ],
+    description: 'An ultra-fine cellular nutrient mist that delivers instant barrier replenishment, protects against environmental dehydration, and leaves an all-day luminous dew.',
+    howToUse: 'Mist 3-4 pumps over face and neck after cleansing or throughout the day whenever skin feels tight or tired.',
+    inStock: true,
+    shipsIn: 'Same-day Dispatch • Free 2-Day Air'
+  },
+  {
+    id: 'retinol-botanical-elixir',
+    title: 'Cellular Renewal Retinol Elixir',
+    subtitle: 'Encapsulated 0.3% Retinol + Bakuchiol Phyto-Firming Night Oil',
+    category: 'Serums',
+    badge: 'Night Intensive',
+    rating: 4.9,
+    reviewCount: 1290,
+    image: retinolElixirImg,
+    cutoutImage: retinolElixirImg,
+    basePrice: 52,
+    activeFormula: 'Encapsulated Retinol 0.3% • Bakuchiol 2.0% • Cold-Pressed Rosehip 10%',
+    variants: [
+      { size: '15ml', label: 'Standard Dropper (15ml)', price: 52, savings: null },
+      { size: '30ml', label: 'Luxury Size (30ml)', price: 84, savings: 'Save 20%' }
+    ],
+    highlights: [
+      'Encapsulated lipid delivery minimizes redness and peeling',
+      'Bakuchiol synergistically doubles collagen remodeling',
+      'Fades stubborn age spots and softens deep furrow lines',
+      'Non-greasy, fast-absorbing botanical dry-oil finish'
+    ],
+    benefitsChecklist: [
+      {
+        heading: 'Accelerates cellular turnover overnight',
+        desc: 'Encapsulated retinol penetrates slow-release lipid microspheres without triggering surface irritation.'
+      },
+      {
+        heading: 'Diminishes sun spots and hyperpigmentation',
+        desc: 'Restructures damaged epidermal cells and evens out tone across sun-exposed areas.'
+      },
+      {
+        heading: 'Rebuilds dermal collagen density',
+        desc: 'Stimulates fibroblast activity to visibly plump hollow cheeks and soften nasolabial creases.'
+      }
+    ],
+    clinical: [
+      { percent: '96%', text: 'Experienced zero redness or flaking compared to traditional retinol' },
+      { percent: '94%', text: 'Noticed visible smoothing of forehead and smile lines' }
+    ],
+    description: 'A slow-release lipid elixir that accelerates cellular turnover, rebuilds collagen matrices, and diminishes stubborn sun spots without retinol flaking or redness.',
+    howToUse: 'Warm 3 drops between fingers and press into clean, dry skin at night before heavier night creams. Always wear SPF the following morning.',
+    inStock: true,
+    shipsIn: 'Same-day Dispatch • Free 2-Day Air'
+  },
+  {
+    id: 'invisible-sun-drops-spf50',
+    title: 'Invisible Sun Drops SPF 50+',
+    subtitle: 'PA++++ Undetectable Broad-Spectrum Serum Sunscreen + Niacinamide',
+    category: 'Sun Care',
+    badge: 'Broad Spectrum 50+',
+    rating: 4.9,
+    reviewCount: 950,
+    image: sunDropsImg,
+    cutoutImage: sunDropsImg,
+    basePrice: 29,
+    activeFormula: 'Uvinul A Plus & Tinosorb S • Niacinamide 3.0% • Hyaluronic Spheres',
+    variants: [
+      { size: '30ml', label: 'Standard Dropper (30ml)', price: 29, savings: null },
+      { size: '60ml', label: 'Twin Pack (60ml)', price: 48, savings: 'Save 17%' }
+    ],
+    highlights: [
+      'High-potency broad spectrum UVA/UVB PA++++ defense',
+      'Serum-dropper texture absorbs with zero chalky cast',
+      'Infused with 3% niacinamide to prevent UV dark spots',
+      'Water-sweat resistant up to 80 minutes, non-comedogenic'
+    ],
+    benefitsChecklist: [
+      {
+        heading: 'Maximum clinical UV defense',
+        desc: 'Next-generation photostable filters prevent sunburn, cellular DNA damage, and premature wrinkling.'
+      },
+      {
+        heading: 'Invisible on all complexions',
+        desc: 'Water-light serum vehicle disappears instantaneously on all skin tones with zero ghosting.'
+      },
+      {
+        heading: 'Niacinamide antioxidant boost',
+        desc: 'Protects lipid barriers against smog, airborne free radicals, and infrared heating.'
+      }
+    ],
+    clinical: [
+      { percent: '99%', text: 'Confirmed 100% invisible finish on all Fitzpatrick skin tones' },
+      { percent: '97%', text: 'Loved the weightless, non-greasy skincare-like feel' }
+    ],
+    description: 'Ultra-light, 100% invisible sun drops that melt weightlessly into the skin with zero white cast, zero greasy film, and heavy antioxidant pollution defense.',
+    howToUse: 'Dispense 1 full dropper onto fingertips and smooth across face, ears, and neck 15 minutes before UV exposure.',
+    inStock: true,
+    shipsIn: 'Same-day Dispatch • Free 2-Day Air'
+  },
+  {
+    id: 'clarifying-salicylic-wash',
+    title: 'Clarifying Exfoliating Cleanser',
+    subtitle: '2% Salicylic BHA + French Green Clay + Centella Soothing Wash',
+    category: 'Cleansers',
+    badge: 'Pore Refining',
+    rating: 4.8,
+    reviewCount: 710,
+    image: bhaCleanserImg,
+    cutoutImage: bhaCleanserImg,
+    basePrice: 21,
+    activeFormula: 'Salicylic Acid (BHA) 2.0% • Kaolin Clay 3.0% • Centella Asiatica 2.0%',
+    variants: [
+      { size: '200ml', label: 'Standard Bottle (200ml)', price: 21, savings: null },
+      { size: '400ml', label: 'Economy Refill (400ml)', price: 34, savings: 'Save 19%' }
+    ],
+    highlights: [
+      '2% pharmaceutical Salicylic Acid clears blackheads & congestion',
+      'French green clay absorbs excess surface shine',
+      'Centella Asiatica soothes redness and prevents post-wash tightness',
+      'Balanced pH 5.2 keeps delicate barrier micro-flora healthy'
+    ],
+    benefitsChecklist: [
+      {
+        heading: 'Deep pore unclogging',
+        desc: 'Oil-soluble salicylic acid dives deep into pores to dissolve trapped sebum and dead keratin cells.'
+      },
+      {
+        heading: 'Refines rough textural bumps',
+        desc: 'Gentle micro-exfoliation resurfaces bumpy forehead and nose textures within 3 uses.'
+      },
+      {
+        heading: 'Calms active blemishes & redness',
+        desc: 'Centella and kaolin soothe inflammatory breakouts without dry stinging.'
+      }
+    ],
+    clinical: [
+      { percent: '98%', text: 'Noticed reduced pore congestion and blackheads in 10 days' },
+      { percent: '95%', text: 'Reported skin felt thoroughly clean without any dryness' }
+    ],
+    description: 'A deep-purifying gel wash designed to dissolve congested pore sebum, clear blackheads, and rebalance oil production without disrupting healthy dermal pH.',
+    howToUse: 'Massage 1-2 pumps onto damp skin for 60 seconds focusing on T-zone. Rinse thoroughly with lukewarm water.',
+    inStock: true,
+    shipsIn: 'Same-day Dispatch • Free 2-Day Air'
   }
 ];
 

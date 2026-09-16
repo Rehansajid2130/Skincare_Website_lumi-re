@@ -24,6 +24,7 @@ export default function LandingPage({
   onSelectProduct,
   onAddToCart,
   onNavigateToProductPage,
+  onNavigateToCatalog,
   onOpenQuiz,
   products = PRODUCTS
 }) {
@@ -99,7 +100,6 @@ export default function LandingPage({
           src={himsHeroBgImg}
           alt="Lumière Clinical Formulations"
           className="hims-hero-bg-img"
-          fetchPriority="high"
           decoding="sync"
         />
         <div className="hims-hero-gradient-overlay" />
@@ -228,6 +228,7 @@ export default function LandingPage({
                     size: '50ml',
                     isSubscription: false,
                     price: 24,
+                    originalPrice: 24,
                     image: creamCutoutImg,
                     qty: 1
                   })}
@@ -248,13 +249,10 @@ export default function LandingPage({
 
         {/* Category Description and Shop All Arrow */}
         <div className="hims-category-subrow">
-          <p className="hims-category-subtext">
-            Dry skin, crow's feet, forehead creases, and sun damage. We combine dermatologist-prescribed actives like tretinoin, azelaic acid, and niacinamide to smooth lines and restore dermal bounce.
-          </p>
           <button
             type="button"
             className="hims-shop-all-btn"
-            onClick={() => onNavigateToProductPage()}
+            onClick={() => onNavigateToCatalog ? onNavigateToCatalog() : onNavigateToProductPage()}
           >
             <span>Shop All Formulations</span>
             <div className="circle-arrow-icon">

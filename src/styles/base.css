@@ -47,6 +47,11 @@
   -webkit-font-smoothing: antialiased;
 }
 
+html {
+  scrollbar-gutter: stable;
+  overflow-y: scroll;
+}
+
 body {
   color-scheme: light;
   font-family: var(--font-sans);
@@ -210,6 +215,107 @@ h1, h2, h3, h4, h5, h6, button, input, select, textarea {
   transform: translateY(-1px);
 }
 
+.hims-account-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  padding: 9px 18px;
+  border-radius: var(--radius-full);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--brand-black);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+.hims-account-btn:hover {
+  background: var(--bg-card-hover);
+  transform: translateY(-1px);
+}
+.hims-account-btn.active {
+  background: var(--brand-black);
+  color: #ffffff;
+  border-color: var(--brand-black);
+}
+
+/* Header Search Form */
+.hims-header-search-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  padding: 8px 14px;
+  width: 200px;
+  transition: all var(--transition-fast);
+}
+
+.hims-header-search-form:focus-within {
+  border-color: var(--brand-black);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(18, 16, 14, 0.06);
+  width: 240px;
+}
+
+.hims-header-search-icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.hims-header-search-input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.84rem;
+  color: var(--text-main);
+  width: 100%;
+  font-family: inherit;
+}
+
+.hims-header-search-input::placeholder {
+  color: var(--text-subtle);
+}
+
+.hims-header-search-clear {
+  background: none;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: color var(--transition-fast);
+}
+
+.hims-header-search-clear:hover {
+  color: var(--brand-black);
+}
+
+.hims-mobile-search-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  padding: 10px 16px;
+  margin-bottom: 12px;
+}
+
+.hims-mobile-search-input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.9rem;
+  color: var(--text-main);
+  width: 100%;
+  font-family: inherit;
+}
+
 /* Mobile Toggle & Menu */
 .hims-mobile-menu-btn {
   display: none;
@@ -232,6 +338,31 @@ h1, h2, h3, h4, h5, h6, button, input, select, textarea {
   display: flex;
   flex-direction: column;
   gap: 130px; /* Generous breathing room between sections */
+  box-sizing: border-box;
+}
+
+.hims-page-container.account-page-mode {
+  max-width: 1240px;
+  width: 100%;
+  padding: 10px 24px 80px;
+  gap: 0;
+  box-sizing: border-box;
+}
+
+/* Global fade-in animation for smooth page and tab transitions */
+.animate-fade-in {
+  animation: globalFadeIn 0.22s ease-out forwards;
+}
+
+@keyframes globalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ponytail: lightweight skeleton container for lazy components */

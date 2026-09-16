@@ -14,6 +14,7 @@ const AdminPortal = lazy(() => import('./components/AdminPortal'));
 const AuthDrawer = lazy(() => import('./components/AuthDrawer'));
 const InstantCheckoutModal = lazy(() => import('./components/InstantCheckoutModal'));
 const OrderConfirmation = lazy(() => import('./components/OrderConfirmation'));
+const CatalogPage = lazy(() => import('./components/CatalogPage'));
 
 export default function App() {
   const [currentView, setCurrentView] = useState('landing'); // 'landing' | 'product' | 'order-confirmation' | 'account' | 'admin'
@@ -46,7 +47,10 @@ export default function App() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.map(p => ({
+          const existingIds = new Set(parsed.map(p => p.id));
+          const newAdditions = PRODUCTS.filter(p => !existingIds.has(p.id));
+          const merged = [...parsed, ...newAdditions];
+          return merged.map(p => ({
             ...p,
             category: p.category || (PRODUCTS.find(dp => dp.id === p.id)?.category) || 'Skincare'
           }));
@@ -117,6 +121,11 @@ export default function App() {
     setIsAuthOpen(false);
   };
 
+  const handleUpdateUser = (updatedUser) => {
+    setCurrentUser(updatedUser);
+    localStorage.setItem('lumiere_auth_user', JSON.stringify(updatedUser));
+  };
+
   const handleLogout = () => {
     setCurrentUser(null);
     localStorage.removeItem('lumiere_auth_user');
@@ -149,6 +158,35 @@ export default function App() {
     saveCart(updated);
   };
 
+  const handleToggleItemSubscription = (itemId) => {
+    const updated = cartItems.map(item => {
+      if (item.id === itemId) {
+        const nextSub = !item.isSubscription;
+        const original = item.originalPrice || (item.isSubscription ? Math.round((item.price / 0.85) * 100) / 100 : item.price);
+        const finalPrice = nextSub ? Math.round(original * 0.85 * 100) / 100 : original;
+        return {
+          ...item,
+          originalPrice: original,
+          isSubscription: nextSub,
+          price: finalPrice,
+          frequency: nextSub ? (item.frequency || 'Every 30 Days') : null
+        };
+      }
+      return item;
+    });
+    saveCart(updated);
+  };
+
+  const handleUpdateItemFrequency = (itemId, frequency) => {
+    const updated = cartItems.map(item => {
+      if (item.id === itemId) {
+        return { ...item, frequency };
+      }
+      return item;
+    });
+    saveCart(updated);
+  };
+
   const handleTriggerCheckout = (method = 'standard') => {
     setCheckoutMethod(method);
     setIsCartOpen(false);
@@ -156,18 +194,93 @@ export default function App() {
   };
 
   const handleOrderComplete = (orderData) => {
-    setLastOrderData(orderData || { items: [...cartItems], orderNumber: '2939993' });
+    const completedItems = orderData?.items || cartItems;
+    setLastOrderData(orderData || { items: [...completedItems], orderNumber: '2939993' });
+    
+    // ponytail: register real active subscriptions for every subscribed item
+    const subItems = completedItems.filter(i => i.isSubscription);
+    if (subItems.length > 0) {
+      try {
+        let existingSubs = [];
+        const saved = localStorage.getItem('lumiere_subscriptions');
+        if (saved) {
+          try { existingSubs = JSON.parse(saved); } catch (e) {}
+        }
+        if (!Array.isArray(existingSubs) || existingSubs.length === 0) {
+          existingSubs = [
+            {
+              id: 'sub_serum_92810',
+              productId: 'custom-anti-aging-serum',
+              status: 'Active',
+              productName: 'Custom Anti-Aging Serum',
+              formulaCode: 'Formula #LM-924',
+              strength: 'Tretinoin 0.025% + Niacinamide 4%',
+              price: 48,
+              frequencyDays: 30,
+              nextRefillDate: 'October 12, 2026',
+              companionAddons: []
+            }
+          ];
+        }
+
+        const nextDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+        const formattedDate = nextDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+        subItems.forEach(item => {
+          const itemTitle = item.title || item.name || 'Custom Formulation';
+          const matchIdx = existingSubs.findIndex(s => 
+            (s.productId && s.productId === item.productId) ||
+            (s.productName && s.productName.toLowerCase() === itemTitle.toLowerCase())
+          );
+          const newSub = {
+            id: 'sub_' + Math.random().toString(36).substring(2, 9),
+            productId: item.productId || item.id,
+            status: 'Active',
+            productName: itemTitle,
+            formulaCode: 'Formula #LM-' + Math.floor(100 + Math.random() * 900),
+            strength: item.size ? `${item.size} • Dermatologist Custom Protocol` : 'Clinical Strength Protocol',
+            price: Number(item.price) || 24,
+            frequencyDays: item.frequency?.includes('60') ? 60 : (item.frequency?.includes('90') ? 90 : 30),
+            nextRefillDate: formattedDate,
+            image: item.image,
+            companionAddons: [],
+            orderId: orderData?.orderNumber
+          };
+          if (matchIdx >= 0) {
+            existingSubs[matchIdx] = { ...existingSubs[matchIdx], ...newSub, id: existingSubs[matchIdx].id };
+          } else {
+            existingSubs.push(newSub);
+          }
+        });
+
+        localStorage.setItem('lumiere_subscriptions', JSON.stringify(existingSubs));
+        localStorage.setItem('lumiere_active_subscription', JSON.stringify(existingSubs[existingSubs.length - 1]));
+      } catch (e) {
+        console.error('Error saving subscriptions:', e);
+      }
+    }
+
     saveCart([]);
     setIsCheckoutModalOpen(false);
     setCurrentView('order-confirmation');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const [catalogCategory, setCatalogCategory] = useState('All');
+  const [catalogSearch, setCatalogSearch] = useState('');
+
   const handleNavigateToProduct = (productId) => {
     if (productId) {
       setSelectedProductId(productId);
     }
     setCurrentView('product');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleNavigateToCatalog = (category = 'All', search = '') => {
+    setCatalogCategory(category || 'All');
+    setCatalogSearch(search || '');
+    setCurrentView('catalog');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -181,6 +294,7 @@ export default function App() {
           cartItems={cartItems}
           setIsCartOpen={setIsCartOpen}
           onNavigateToProductPage={handleNavigateToProduct}
+          onNavigateToCatalog={handleNavigateToCatalog}
           currentUser={currentUser}
           onOpenAuth={handleOpenAuth}
           onOpenQuiz={() => setIsQuizOpen(true)}
@@ -189,14 +303,31 @@ export default function App() {
       )}
 
       {/* Main Content Area */}
-      <main className="hims-page-container">
+      <main className={`hims-page-container ${currentView === 'catalog' ? 'catalog-page-mode' : ''} ${currentView === 'account' ? 'account-page-mode' : ''}`}>
         {currentView === 'landing' && (
           <LandingPage 
             products={productsList}
             onAddToCart={handleAddToCart}
             onNavigateToProductPage={handleNavigateToProduct}
+            onNavigateToCatalog={handleNavigateToCatalog}
             onOpenQuiz={() => setIsQuizOpen(true)}
           />
+        )}
+        {currentView === 'catalog' && (
+          <Suspense fallback={<div className="hims-suspense-loader" />}>
+            <CatalogPage 
+              key={`${catalogCategory}-${catalogSearch}`}
+              products={productsList}
+              initialCategory={catalogCategory}
+              initialSearch={catalogSearch}
+              onNavigateToProduct={handleNavigateToProduct}
+              onAddToCart={handleAddToCart}
+              onNavigateToLanding={() => {
+                setCurrentView('landing');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            />
+          </Suspense>
         )}
         {currentView === 'product' && (
           <ProductPage 
@@ -227,6 +358,11 @@ export default function App() {
               currentUser={currentUser}
               onOpenAuth={handleOpenAuth}
               onLogout={handleLogout}
+              onUpdateUser={handleUpdateUser}
+              onNavigateToAdmin={() => {
+                setCurrentView('admin');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
               onNavigateToLanding={() => {
                 setCurrentView('landing');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -278,8 +414,11 @@ export default function App() {
         cartItems={cartItems}
         onUpdateQty={handleUpdateQty}
         onRemoveItem={handleRemoveItem}
+        onToggleSubscription={handleToggleItemSubscription}
+        onUpdateFrequency={handleUpdateItemFrequency}
         onTriggerCheckout={handleTriggerCheckout}
         onAddToCart={handleAddToCart}
+        onNavigateToCatalog={handleNavigateToCatalog}
       />
 
       {/* Onboarding & Authentication Drawer (Lazy) */}
@@ -325,39 +464,13 @@ export default function App() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           onNavigateToProductPage={() => handleNavigateToProduct('custom-anti-aging-serum')}
+          onNavigateToCatalog={handleNavigateToCatalog}
           onNavigateToAdmin={() => {
             setCurrentView('admin');
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
         />
       )}
-
-      {/* Quick Developer / Admin Switcher Button (Bottom Left) */}
-      <div className="hims-admin-quick-toggle">
-        {currentView === 'admin' ? (
-          <button 
-            type="button" 
-            className="admin-floating-btn"
-            onClick={() => {
-              setCurrentView('landing');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-          >
-            ← View Storefront
-          </button>
-        ) : (
-          <button 
-            type="button" 
-            className="admin-floating-btn"
-            onClick={() => {
-              setCurrentView('admin');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-          >
-            ⚙️ Admin Portal
-          </button>
-        )}
-      </div>
     </div>
   );
 }

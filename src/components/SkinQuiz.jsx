@@ -1,5 +1,5 @@
 // ponytail: high-converting DTC luxury skin assessment quiz funnel matching Lumière aesthetic
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, ArrowRight, Check, Sparkles, ShieldCheck, RefreshCw, UserCheck, Droplets, Sun, Moon, Activity, Layers } from 'lucide-react';
 import serumCutoutImg from '../assets/serum_cutout.png';
 import creamCutoutImg from '../assets/cream_cutout.png';
@@ -13,6 +13,7 @@ export default function SkinQuiz({
   onQuizComplete
 }) {
   const [currentStep, setCurrentStep] = useState(1); // 1, 2, 3, 4, 'analyzing', 'result'
+  const overlayRef = useRef(null);
   const [answers, setAnswers] = useState({
     concern: 'wrinkles',
     skinType: 'combination',
@@ -20,6 +21,23 @@ export default function SkinQuiz({
     routine: 'complete'
   });
   const [analyzingStage, setAnalyzingStage] = useState(0);
+
+  // Lock background scroll when quiz is open
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, []);
+
+  // Instant scroll-to-top whenever transitioning between questions or views
+  useEffect(() => {
+    if (overlayRef.current) {
+      overlayRef.current.scrollTo({ top: 0, behavior: 'instant' });
+    }
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [currentStep]);
 
   // Analysis screen stage animation
   useEffect(() => {
@@ -222,7 +240,12 @@ export default function SkinQuiz({
   };
 
   return (
-    <div className="hims-quiz-overlay" role="dialog" aria-modal="true">
+    <div 
+      ref={overlayRef}
+      className={`hims-quiz-overlay ${currentStep === 'result' ? 'quiz-result-scrollable' : 'quiz-no-scroll'}`} 
+      role="dialog" 
+      aria-modal="true"
+    >
       {/* Quiz Top Navigation */}
       <div className="hims-quiz-nav">
         <div className="hims-quiz-nav-inner">
@@ -270,7 +293,7 @@ export default function SkinQuiz({
       </div>
 
       {/* Quiz Content Container */}
-      <div className="hims-quiz-body">
+      <div className={`hims-quiz-body ${currentStep === 'result' ? 'quiz-body-result' : 'quiz-body-questions'}`}>
         {/* STEP 1: SKIN CONCERN */}
         {currentStep === 1 && (
           <div className="hims-quiz-step-card animate-fade-in">
@@ -280,14 +303,14 @@ export default function SkinQuiz({
               Our dermatologists use this to determine the exact active compounds for your custom formulation.
             </p>
 
-            <div className="quiz-options-grid">
-              {concernsList.map((item) => {
+            <div className="quiz-options-grid quiz-grid-2col">
+              {concernsList.map((item, index) => {
                 const isSelected = answers.concern === item.id;
                 return (
                   <button
                     key={item.id}
                     type="button"
-                    className={`quiz-option-card ${isSelected ? 'selected' : ''}`}
+                    className={`quiz-option-card ${isSelected ? 'selected' : ''} ${index === 4 ? 'span-2' : ''}`}
                     onClick={() => handleSelectOption('concern', item.id)}
                   >
                     <div className="quiz-option-content">
@@ -327,14 +350,14 @@ export default function SkinQuiz({
               This calibrates the emollient base so your skin absorbs the treatment without oiliness or irritation.
             </p>
 
-            <div className="quiz-options-grid">
-              {skinTypesList.map((item) => {
+            <div className="quiz-options-grid quiz-grid-2col">
+              {skinTypesList.map((item, index) => {
                 const isSelected = answers.skinType === item.id;
                 return (
                   <button
                     key={item.id}
                     type="button"
-                    className={`quiz-option-card ${isSelected ? 'selected' : ''}`}
+                    className={`quiz-option-card ${isSelected ? 'selected' : ''} ${index === 4 ? 'span-2' : ''}`}
                     onClick={() => handleSelectOption('skinType', item.id)}
                   >
                     <div className="quiz-option-content">
@@ -371,7 +394,7 @@ export default function SkinQuiz({
               Tretinoin is 20x stronger than OTC retinol. We personalize the starting strength for seamless tolerance.
             </p>
 
-            <div className="quiz-options-grid">
+            <div className="quiz-options-grid quiz-grid-1col">
               {experienceList.map((item) => {
                 const isSelected = answers.experience === item.id;
                 return (
@@ -415,7 +438,7 @@ export default function SkinQuiz({
               Whether you want a simple 60-second bedside routine or a complete clinical set, we design around you.
             </p>
 
-            <div className="quiz-options-grid">
+            <div className="quiz-options-grid quiz-grid-1col">
               {routineList.map((item) => {
                 const isSelected = answers.routine === item.id;
                 return (

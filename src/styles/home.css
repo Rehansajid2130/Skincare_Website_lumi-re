@@ -320,7 +320,7 @@
 .hims-category-subrow {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 32px;
   padding: 12px 4px;
 }

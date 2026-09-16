@@ -2,12 +2,14 @@
    MY ACCOUNT & SUBSCRIPTION MANAGEMENT PORTAL
    ========================================================================== */
 .hims-account-page-wrapper {
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 36px 24px 120px;
+  padding: 24px 0 100px;
   display: flex;
   flex-direction: column;
   gap: 32px;
+  box-sizing: border-box;
 }
 
 /* Toast Feedback */
@@ -36,6 +38,8 @@
 
 /* Top Profile Banner */
 .hims-account-hero-bar {
+  width: 100%;
+  box-sizing: border-box;
   background: #ffffff;
   border: 1px solid #e7e0d6;
   border-radius: 24px;
@@ -137,6 +141,8 @@
 
 /* Tabs Bar */
 .hims-account-tabs-nav-bar {
+  width: 100%;
+  box-sizing: border-box;
   border-bottom: 2px solid #e7e0d6;
   padding-bottom: 0;
 }
@@ -177,10 +183,20 @@
 }
 
 /* Main Content Panel */
+.hims-account-main-content {
+  width: 100%;
+  min-width: 0;
+  min-height: 520px;
+  box-sizing: border-box;
+}
+
 .hims-account-tab-panel {
+  width: 100%;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 28px;
+  box-sizing: border-box;
 }
 
 .panel-header-row {
@@ -221,6 +237,8 @@
 
 /* Primary Subscription Card */
 .hims-sub-card {
+  width: 100%;
+  box-sizing: border-box;
   background: #ffffff;
   border: 1px solid #e7e0d6;
   border-radius: 24px;
@@ -490,7 +508,8 @@
   gap: 24px;
 }
 
-.addon-product-card {
+.addon-product-card,
+.addon-card {
   background: #ffffff;
   border: 1px solid #e7e0d6;
   border-radius: 20px;
@@ -502,13 +521,15 @@
   transition: var(--transition-base);
 }
 
-.addon-product-card:hover {
+.addon-product-card:hover,
+.addon-card:hover {
   border-color: #8C6D53;
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(140, 109, 83, 0.09);
 }
 
-.addon-img-box {
+.addon-img-box,
+.addon-img-wrap {
   width: 100%;
   height: 140px;
   background: #F9F6F0;
@@ -517,15 +538,27 @@
   align-items: center;
   justify-content: center;
   padding: 12px;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
-.addon-img-box img {
-  max-width: 90%;
-  max-height: 90%;
-  object-fit: contain;
+.addon-img-box img,
+.addon-img-wrap img,
+.addon-card img,
+.addon-product-card img,
+.addon-img-box .product-cutout-img,
+.addon-img-wrap .product-cutout-img {
+  max-width: 90% !important;
+  max-height: 115px !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
+  display: block;
+  margin: 0 auto;
 }
 
-.addon-step-label {
+.addon-step-label,
+.addon-tag {
   font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -533,7 +566,8 @@
   text-transform: uppercase;
 }
 
-.addon-prod-title {
+.addon-prod-title,
+.addon-name {
   font-family: var(--font-serif);
   font-size: 1.05rem;
   font-weight: 700;
@@ -541,14 +575,16 @@
   margin: 4px 0;
 }
 
-.addon-prod-desc {
+.addon-prod-desc,
+.addon-desc {
   font-size: 0.82rem;
   color: #665f57;
   line-height: 1.4;
   margin: 0;
 }
 
-.addon-bottom-row {
+.addon-bottom-row,
+.addon-price-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -591,23 +627,30 @@
 
 /* Order History Cards */
 .hims-orders-list {
+  width: 100%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
 }
 
 .hims-order-card {
+  width: 100%;
+  box-sizing: border-box;
   background: #ffffff;
   border: 1px solid #e7e0d6;
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 3px 16px rgba(0,0,0,0.03);
+  transition: var(--transition-base);
 }
 
 .order-card-header {
+  width: 100%;
+  box-sizing: border-box;
   background: #F9F6F0;
   border-bottom: 1px solid #e7e0d6;
-  padding: 18px 24px;
+  padding: 18px 28px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -651,68 +694,78 @@
 }
 
 .order-card-body {
-  padding: 24px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 28px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 24px;
+  gap: 28px;
 }
 
 .order-items-preview {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
+  flex: 1 1 400px;
+  min-width: 0;
 }
 
 .order-item-thumb {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
 }
 
 .order-item-thumb img {
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   object-fit: contain;
   background: #F9F6F0;
-  border-radius: 10px;
-  padding: 4px;
+  border-radius: 12px;
+  padding: 6px;
+  flex-shrink: 0;
 }
 
 .thumb-title {
-  font-size: 0.95rem;
+  font-size: 0.98rem;
   font-weight: 700;
   color: #111111;
 }
 
 .thumb-sub {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   color: #78716c;
 }
 
 .order-pricing-summary {
   text-align: right;
+  flex-shrink: 0;
+  padding-left: 16px;
 }
 
 .pricing-line {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   color: #111111;
 }
 
 .shipping-line {
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   color: #78716c;
   margin-top: 4px;
 }
 
 .order-card-footer {
+  width: 100%;
+  box-sizing: border-box;
   background: #ffffff;
   border-top: 1px solid #f3efe9;
-  padding: 16px 24px;
+  padding: 18px 28px;
   display: flex;
   gap: 12px;
   justify-content: flex-end;
+  flex-wrap: wrap;
 }
 
 .order-action-btn {
@@ -722,6 +775,8 @@
 
 /* Skin Profile & Prescriptions */
 .hims-skin-profile-grid {
+  width: 100%;
+  box-sizing: border-box;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
@@ -815,8 +870,223 @@
   margin: 0;
 }
 
+/* Staff / Store Admin Access Card */
+.hims-admin-access-card {
+  width: 100%;
+  box-sizing: border-box;
+  background: linear-gradient(135deg, #FAF7F2 0%, #F4ECE1 100%);
+  border: 1.5px solid #E2D7C7;
+  border-radius: 20px;
+  padding: 24px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(35, 25, 18, 0.04);
+}
+
+.admin-access-left {
+  flex: 1;
+}
+
+.admin-access-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.admin-staff-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #111111;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+}
+
+.admin-active-status {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #8C6D53;
+}
+
+.admin-access-title {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111111;
+  margin: 0 0 6px;
+  letter-spacing: -0.02em;
+}
+
+.admin-access-desc {
+  font-size: 0.88rem;
+  color: #5c554e;
+  line-height: 1.5;
+  margin: 0 0 12px;
+  max-width: 620px;
+}
+
+.admin-feature-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.feature-tag {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid #e0d7cb;
+  color: #554e47;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+}
+
+.admin-access-right {
+  flex-shrink: 0;
+}
+
+.admin-launch-btn {
+  padding: 12px 22px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* Profile Form Styles */
+.profile-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.profile-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profile-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #332f2b;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.req-star {
+  color: #dc2626;
+}
+
+.profile-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  font-size: 0.92rem;
+  border: 1.5px solid #e7e0d6;
+  border-radius: 10px;
+  background: #faf8f5;
+  color: #111111;
+  outline: none;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.profile-input:focus {
+  border-color: #111111;
+  background: #ffffff;
+}
+
+.input-hint {
+  font-size: 0.74rem;
+  color: #8c867e;
+  line-height: 1.35;
+}
+
+.profile-save-action-row {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 14px;
+  border-top: 1px solid #f3efe9;
+}
+
+.profile-save-btn {
+  padding: 10px 22px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+
+/* Notification Toggles */
+.notification-toggles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notif-toggle-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #fbf9f5;
+  border: 1px solid #eee8df;
+  transition: background var(--transition-fast);
+}
+
+.notif-toggle-item:hover {
+  background: #f5f0e6;
+}
+
+.notif-checkbox {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: #111111;
+  cursor: pointer;
+}
+
+.notif-toggle-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.notif-toggle-text strong {
+  font-size: 0.88rem;
+  color: #111111;
+}
+
+.notif-toggle-text span {
+  font-size: 0.78rem;
+  color: #665f57;
+  line-height: 1.35;
+}
+
 /* Settings Tab */
 .hims-settings-grid {
+  width: 100%;
+  box-sizing: border-box;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 24px;
@@ -1139,6 +1409,18 @@
   }
   .hims-skin-profile-grid,
   .hims-settings-grid {
+    grid-template-columns: 1fr;
+  }
+  .hims-admin-access-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .admin-launch-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .profile-form-grid {
     grid-template-columns: 1fr;
   }
 }

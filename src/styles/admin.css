@@ -1041,3 +1041,179 @@
   .hims-admin-header-inner { flex-direction: column; gap: 14px; align-items: flex-start; }
   .admin-modal-form { padding: 20px; }
 }
+
+/* ==========================================================================
+   ADMIN BILLING & PAYMENT DIAGNOSTICS STYLES (agency-payments-billing-engineer)
+   ========================================================================== */
+
+.hims-admin-billing-view {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.admin-billing-test-harness {
+  background: #ffffff;
+  border: 1px solid #e7e0d6;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+}
+
+.test-harness-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0ebe1;
+}
+
+.test-harness-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #111111;
+  margin: 0 0 4px 0;
+}
+
+.test-harness-sub {
+  font-size: 0.84rem;
+  color: #78716c;
+  max-width: 680px;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.test-harness-buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.test-runner-btn {
+  background: #faf8f5;
+  border: 1px solid #e7e0d6;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.test-runner-btn:hover {
+  background: #ffffff;
+  border-color: #8C6D53;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+}
+
+.test-runner-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.runner-btn-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.runner-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.runner-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #554e47;
+}
+
+.runner-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #111111;
+}
+
+.runner-number {
+  font-size: 0.82rem;
+  font-family: monospace;
+  color: #8C6D53;
+  font-weight: 700;
+}
+
+.runner-desc {
+  font-size: 0.74rem;
+  color: #78716c;
+  line-height: 1.4;
+  margin-top: 4px;
+}
+
+.idempotency-btn {
+  background: #f0f7ff;
+  border-color: #bfdbfe;
+}
+
+.idempotency-btn:hover {
+  border-color: #3b82f6;
+}
+
+/* Diagnostic Terminal */
+.diag-terminal-box {
+  margin-top: 20px;
+  background: #111827;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.diag-terminal-header {
+  background: #1f2937;
+  padding: 8px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #d1d5db;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #374151;
+}
+
+.diag-terminal-body {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+  font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
+}
+
+.diag-log-line {
+  font-size: 0.75rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.4;
+}
+
+.diag-log-time {
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.diag-log-line.info .diag-log-msg { color: #93c5fd; }
+.diag-log-line.success .diag-log-msg { color: #86efac; font-weight: 600; }
+.diag-log-line.warning .diag-log-msg { color: #fde047; }
+.diag-log-line.error .diag-log-msg { color: #fca5a5; font-weight: 600; }
+

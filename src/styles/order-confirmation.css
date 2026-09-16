@@ -281,3 +281,247 @@
   }
 }
 
+/* Top bar with return & lookup */
+.order-confirm-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.order-lookup-form {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  padding: 4px 6px 4px 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.lookup-icon {
+  color: var(--text-subtle);
+  margin-right: 8px;
+}
+
+.order-lookup-input {
+  border: none;
+  background: transparent;
+  font-size: 0.84rem;
+  color: var(--text-main);
+  outline: none;
+  width: 170px;
+}
+
+.order-lookup-btn {
+  background: var(--brand-black);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 6px 14px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.order-lookup-btn:hover {
+  opacity: 0.88;
+}
+
+/* Live Tracking Timeline Stepper */
+.order-tracking-timeline-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 24px 28px;
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.timeline-header-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 0.86rem;
+}
+
+.meta-carrier {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: var(--brand-black);
+}
+
+.meta-eta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+}
+
+.stepper-track-wrap {
+  position: relative;
+  width: 100%;
+  padding: 8px 0;
+}
+
+.stepper-progress-bar {
+  position: absolute;
+  top: 19px;
+  left: 5%;
+  height: 3px;
+  background: #059669;
+  z-index: 1;
+  transition: width 0.6s ease;
+}
+
+.stepper-nodes {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
+}
+
+.stepper-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  width: 120px;
+}
+
+.node-dot {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.stepper-node.completed .node-dot {
+  background: #059669;
+}
+
+.stepper-node.current .node-dot {
+  background: var(--brand-black);
+  box-shadow: 0 0 0 3px rgba(18, 16, 14, 0.2);
+}
+
+.node-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.25;
+}
+
+.node-date {
+  font-size: 0.7rem;
+  color: var(--text-subtle);
+}
+
+.carrier-badge-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-card);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-top: 10px;
+}
+
+.support-link-btn {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--brand-bronze);
+  text-decoration: none;
+}
+
+.support-link-btn:hover {
+  text-decoration: underline;
+}
+
+/* Delivery FAQs */
+.order-faqs-section {
+  margin-top: 48px;
+  padding-top: 36px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.faqs-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 20px;
+}
+
+.faqs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.faq-item {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.faq-question-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: none;
+  border: none;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-main);
+  cursor: pointer;
+  text-align: left;
+}
+
+.faq-answer-text {
+  padding: 0 20px 18px;
+  font-size: 0.86rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .stepper-nodes {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .stepper-progress-bar {
+    display: none;
+  }
+  .stepper-node {
+    flex-direction: row;
+    width: 100%;
+    text-align: left;
+    gap: 14px;
+  }
+}
+
