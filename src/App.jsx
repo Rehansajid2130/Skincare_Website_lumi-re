@@ -16,11 +16,53 @@ const InstantCheckoutModal = lazy(() => import('./components/InstantCheckoutModa
 const OrderConfirmation = lazy(() => import('./components/OrderConfirmation'));
 const CatalogPage = lazy(() => import('./components/CatalogPage'));
 
+// Helper to parse route from location hash or localStorage so refreshing stays on the active view
+const getInitialRoute = () => {
+  try {
+    const hash = window.location.hash.replace(/^#\/?/, '').trim();
+    if (hash.startsWith('product/')) {
+      const pId = hash.split('/')[1];
+      return { view: 'product', productId: pId || 'custom-anti-aging-serum' };
+    }
+    if (hash === 'catalog' || hash.startsWith('catalog?')) {
+      return { view: 'catalog', productId: null };
+    }
+    if (hash === 'account') {
+      return { view: 'account', productId: null };
+    }
+    if (hash === 'admin') {
+      return { view: 'admin', productId: null };
+    }
+    if (hash === 'order-confirmation') {
+      return { view: 'order-confirmation', productId: null };
+    }
+    if (hash === 'landing') {
+      return { view: 'landing', productId: 'custom-anti-aging-serum' };
+    }
+
+    // If no hash, check localStorage for persisted view across reloads
+    const savedView = localStorage.getItem('lumiere_current_view');
+    const savedProd = localStorage.getItem('lumiere_selected_product_id');
+    if (savedView && ['catalog', 'product', 'account', 'admin', 'order-confirmation'].includes(savedView)) {
+      return { view: savedView, productId: savedProd || 'custom-anti-aging-serum' };
+    }
+  } catch (e) {}
+  return { view: 'landing', productId: 'custom-anti-aging-serum' };
+};
+
 export default function App() {
-  const [currentView, setCurrentView] = useState('landing'); // 'landing' | 'product' | 'order-confirmation' | 'account' | 'admin'
-  const [selectedProductId, setSelectedProductId] = useState('custom-anti-aging-serum');
+  const initialRoute = getInitialRoute();
+  const [currentView, setCurrentView] = useState(initialRoute.view);
+  const [selectedProductId, setSelectedProductId] = useState(initialRoute.productId || 'custom-anti-aging-serum');
   const [cartItems, setCartItems] = useState([]);
-  const [lastOrderData, setLastOrderData] = useState(null);
+  const [lastOrderData, setLastOrderData] = useState(() => {
+    try {
+      const saved = localStorage.getItem('lumiere_last_order');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      return null;
+    }
+  });
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
   const [checkoutMethod, setCheckoutMethod] = useState('standard');
@@ -105,6 +147,57 @@ export default function App() {
     }
   }, []);
 
+  // Synchronize route with URL hash & localStorage so reloading the page stays on the current view
+  useEffect(() => {
+    try {
+      localStorage.setItem('lumiere_current_view', currentView);
+      if (selectedProductId) {
+        localStorage.setItem('lumiere_selected_product_id', selectedProductId);
+      }
+
+      let newHash = '';
+      if (currentView === 'product') {
+        newHash = `#product/${selectedProductId}`;
+      } else if (currentView === 'catalog') {
+        newHash = '#catalog';
+      } else if (currentView === 'account') {
+        newHash = '#account';
+      } else if (currentView === 'admin') {
+        newHash = '#admin';
+      } else if (currentView === 'order-confirmation') {
+        newHash = '#order-confirmation';
+      } else {
+        newHash = '';
+      }
+
+      const currentHash = window.location.hash.replace(/^#\/?/, '').trim();
+      const targetHashClean = newHash.replace(/^#\/?/, '').trim();
+      if (currentHash !== targetHashClean) {
+        window.history.replaceState(null, '', newHash || window.location.pathname);
+      }
+    } catch (e) {}
+  }, [currentView, selectedProductId]);
+
+  // Support browser Back and Forward navigation buttons
+  useEffect(() => {
+    const handleHashChange = () => {
+      const route = getInitialRoute();
+      if (route.view && route.view !== currentView) {
+        setCurrentView(route.view);
+      }
+      if (route.productId && route.productId !== selectedProductId) {
+        setSelectedProductId(route.productId);
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    window.addEventListener('popstate', handleHashChange);
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+      window.removeEventListener('popstate', handleHashChange);
+    };
+  }, [currentView, selectedProductId]);
+
   const saveCart = (items) => {
     setCartItems(items);
     localStorage.setItem('lumiere_modern_cart', JSON.stringify(items));
@@ -142,6 +235,44 @@ export default function App() {
     }
     saveCart(updated);
     setIsCartOpen(true);
+
+    // ponytail: if added as auto-ship subscription, sync immediately to active subscriptions
+    if (newItem.isSubscription) {
+      try {
+        let existingSubs = [];
+        const saved = localStorage.getItem('lumiere_subscriptions');
+        if (saved) {
+          try { existingSubs = JSON.parse(saved); } catch (e) {}
+        }
+        if (!Array.isArray(existingSubs)) existingSubs = [];
+        const itemTitle = newItem.title || newItem.name || 'Clinical Formulation';
+        const matchIdx = existingSubs.findIndex(s => 
+          (s.productId && s.productId === newItem.productId) ||
+          (s.productName && s.productName.toLowerCase() === itemTitle.toLowerCase())
+        );
+        const nextDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+        const newSub = {
+          id: 'sub_' + Math.random().toString(36).substring(2, 9),
+          productId: newItem.productId || newItem.id,
+          status: 'Active',
+          productName: itemTitle,
+          formulaCode: 'Formula #LM-' + Math.floor(100 + Math.random() * 900),
+          strength: newItem.size ? `${newItem.size} • Dermatologist Custom Protocol` : 'Clinical Strength Protocol',
+          price: Number(newItem.price) || 24,
+          frequencyDays: newItem.frequency?.includes('60') ? 60 : (newItem.frequency?.includes('90') ? 90 : 30),
+          nextRefillDate: nextDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+          image: newItem.image,
+          companionAddons: []
+        };
+        if (matchIdx >= 0) {
+          existingSubs[matchIdx] = { ...existingSubs[matchIdx], ...newSub, id: existingSubs[matchIdx].id };
+        } else {
+          existingSubs.push(newSub);
+        }
+        localStorage.setItem('lumiere_subscriptions', JSON.stringify(existingSubs));
+        window.dispatchEvent(new Event('lumiere_subscription_updated'));
+      } catch (e) {}
+    }
   };
 
   const handleUpdateQty = (itemId, newQty) => {
@@ -159,22 +290,61 @@ export default function App() {
   };
 
   const handleToggleItemSubscription = (itemId) => {
+    let toggledItem = null;
     const updated = cartItems.map(item => {
       if (item.id === itemId) {
         const nextSub = !item.isSubscription;
         const original = item.originalPrice || (item.isSubscription ? Math.round((item.price / 0.85) * 100) / 100 : item.price);
         const finalPrice = nextSub ? Math.round(original * 0.85 * 100) / 100 : original;
-        return {
+        toggledItem = {
           ...item,
           originalPrice: original,
           isSubscription: nextSub,
           price: finalPrice,
           frequency: nextSub ? (item.frequency || 'Every 30 Days') : null
         };
+        return toggledItem;
       }
       return item;
     });
     saveCart(updated);
+
+    if (toggledItem && toggledItem.isSubscription) {
+      try {
+        let existingSubs = [];
+        const saved = localStorage.getItem('lumiere_subscriptions');
+        if (saved) {
+          try { existingSubs = JSON.parse(saved); } catch (e) {}
+        }
+        if (!Array.isArray(existingSubs)) existingSubs = [];
+        const itemTitle = toggledItem.title || 'Clinical Formulation';
+        const matchIdx = existingSubs.findIndex(s => 
+          (s.productId && s.productId === toggledItem.productId) ||
+          (s.productName && s.productName.toLowerCase() === itemTitle.toLowerCase())
+        );
+        const nextDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+        const newSub = {
+          id: 'sub_' + Math.random().toString(36).substring(2, 9),
+          productId: toggledItem.productId || toggledItem.id,
+          status: 'Active',
+          productName: itemTitle,
+          formulaCode: 'Formula #LM-' + Math.floor(100 + Math.random() * 900),
+          strength: toggledItem.size ? `${toggledItem.size} • Dermatologist Custom Protocol` : 'Clinical Strength Protocol',
+          price: Number(toggledItem.price) || 24,
+          frequencyDays: 30,
+          nextRefillDate: nextDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+          image: toggledItem.image,
+          companionAddons: []
+        };
+        if (matchIdx >= 0) {
+          existingSubs[matchIdx] = { ...existingSubs[matchIdx], ...newSub, id: existingSubs[matchIdx].id };
+        } else {
+          existingSubs.push(newSub);
+        }
+        localStorage.setItem('lumiere_subscriptions', JSON.stringify(existingSubs));
+        window.dispatchEvent(new Event('lumiere_subscription_updated'));
+      } catch (e) {}
+    }
   };
 
   const handleUpdateItemFrequency = (itemId, frequency) => {
@@ -255,12 +425,17 @@ export default function App() {
 
         localStorage.setItem('lumiere_subscriptions', JSON.stringify(existingSubs));
         localStorage.setItem('lumiere_active_subscription', JSON.stringify(existingSubs[existingSubs.length - 1]));
+        window.dispatchEvent(new Event('lumiere_subscription_updated'));
       } catch (e) {
         console.error('Error saving subscriptions:', e);
       }
     }
 
     saveCart([]);
+    setLastOrderData(orderData);
+    try {
+      localStorage.setItem('lumiere_last_order', JSON.stringify(orderData));
+    } catch (e) {}
     setIsCheckoutModalOpen(false);
     setCurrentView('order-confirmation');
     window.scrollTo({ top: 0, behavior: 'smooth' });

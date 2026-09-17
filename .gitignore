@@ -6,3 +6,10 @@ dist-ssr
 .DS_Store
 *.mjs.timestamp*
 vite.config.js.timestamp*
+
+# Environment and secrets
+.env
+.env.*
+server/.env
+server/.env.*
+*.env

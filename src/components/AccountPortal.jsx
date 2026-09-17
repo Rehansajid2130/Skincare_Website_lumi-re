@@ -25,8 +25,10 @@ import {
 } from 'lucide-react';
 import serumCutoutImg from '../assets/serum_cutout.png';
 import creamCutoutImg from '../assets/cream_cutout.png';
+import rxCreamCutoutImg from '../assets/rx_cream_cutout.png';
 import sunscreenCutoutImg from '../assets/sunscreen_cutout.png';
 import cleanserCutoutImg from '../assets/cleanser_cutout.png';
+import { PRODUCTS } from '../data/products';
 
 export default function AccountPortal({
   currentUser,
@@ -67,34 +69,163 @@ export default function AccountPortal({
     }
   }, [currentUser]);
 
-  // Subscription state from localStorage or initial defaults
-  const [subscription, setSubscription] = useState(() => {
-    try {
-      const saved = localStorage.getItem('lumiere_active_subscription');
-      if (saved) return JSON.parse(saved);
-    } catch (e) { }
-    return {
-      id: 'sub_lm_92810',
-      status: 'Active',
-      productName: 'Custom Anti-Aging Serum',
-      formulaCode: 'Formula #LM-924',
-      strength: 'Tretinoin 0.025% + Niacinamide 4%',
-      price: 48,
-      frequencyDays: 30,
-      nextRefillDate: 'October 12, 2026',
-      companionAddons: []
-    };
-  });
+  const loadMergedSubscriptions = () => {
+    const list = [];
+    const seen = new Set();
 
-  // Sync latest subscription from localStorage on mount
-  useEffect(() => {
+    const addSub = (sub) => {
+      if (!sub) return;
+      const key = (sub.productId || sub.productName || sub.title || '').toLowerCase().trim();
+      if (!key || seen.has(key)) return;
+      seen.add(key);
+
+      const catalogMatch = PRODUCTS.find(p => 
+        p.id === sub.productId || 
+        p.title.toLowerCase() === (sub.productName || sub.title || '').toLowerCase()
+      );
+
+      const isCream = key.includes('cream');
+      const isRx = key.includes('rx') || key.includes('prescription');
+      const isSPF = key.includes('sunscreen') || key.includes('spf');
+      const isCleanser = key.includes('cleanser');
+
+      const fallbackImage = isRx ? rxCreamCutoutImg 
+        : (isCream ? creamCutoutImg 
+        : (isSPF ? sunscreenCutoutImg 
+        : (isCleanser ? cleanserCutoutImg : serumCutoutImg)));
+
+      list.push({
+        id: sub.id || ('sub_' + Math.random().toString(36).substring(2, 9)),
+        productId: sub.productId || catalogMatch?.id || key,
+        status: sub.status || 'Active',
+        productName: sub.productName || sub.title || catalogMatch?.title || 'Clinical Formulation',
+        formulaCode: sub.formulaCode || (catalogMatch?.id ? `Formula #${catalogMatch.id.substring(0, 4).toUpperCase()}` : 'Formula #LM-924'),
+        strength: sub.strength || catalogMatch?.activeFormula || 'Dermatologist Custom Protocol',
+        price: Number(sub.price) || (catalogMatch ? Math.round(catalogMatch.basePrice * 0.85 * 100) / 100 : 24),
+        frequencyDays: Number(sub.frequencyDays) || (sub.frequency?.includes('60') ? 60 : (sub.frequency?.includes('90') ? 90 : 30)),
+        nextRefillDate: sub.nextRefillDate || 'October 16, 2026',
+        image: sub.image || catalogMatch?.cutoutImage || catalogMatch?.image || fallbackImage,
+        description: sub.description || catalogMatch?.description || 'Formulated with prescription-strength active ingredients backed by board-certified dermatologists.',
+        companionAddons: sub.companionAddons || []
+      });
+    };
+
+    // 1. Load from lumiere_subscriptions
     try {
-      const saved = localStorage.getItem('lumiere_active_subscription');
+      const saved = localStorage.getItem('lumiere_subscriptions');
       if (saved) {
-        setSubscription(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) parsed.forEach(addSub);
       }
     } catch (e) {}
+
+    // 2. Load any subscription items from lumiere_modern_cart or lumiere_cart
+    try {
+      const savedCart = localStorage.getItem('lumiere_modern_cart') || localStorage.getItem('lumiere_cart');
+      if (savedCart) {
+        const parsedCart = JSON.parse(savedCart);
+        if (Array.isArray(parsedCart)) {
+          parsedCart.filter(item => item.isSubscription).forEach(item => {
+            addSub({
+              id: 'sub_' + (item.productId || item.id),
+              productId: item.productId || item.id,
+              productName: item.title || item.name,
+              price: item.price,
+              frequencyDays: item.frequency?.includes('60') ? 60 : (item.frequency?.includes('90') ? 90 : 30),
+              image: item.image
+            });
+          });
+        }
+      }
+    } catch (e) {}
+
+    // 3. Load from legacy single active subscription
+    try {
+      const single = localStorage.getItem('lumiere_active_subscription');
+      if (single) addSub(JSON.parse(single));
+    } catch (e) {}
+
+    // 4. Default items if list is empty
+    if (!seen.has('custom-anti-aging-serum') && !seen.has('custom anti-aging serum')) {
+      addSub({
+        id: 'sub_serum_92810',
+        productId: 'custom-anti-aging-serum',
+        status: 'Active',
+        productName: 'Custom Anti-Aging Serum',
+        formulaCode: 'Formula #LM-924',
+        strength: 'Tretinoin 0.025% + Niacinamide 4%',
+        price: 48,
+        frequencyDays: 30,
+        nextRefillDate: 'October 12, 2026',
+        image: serumCutoutImg
+      });
+    }
+
+    if (!seen.has('goodnight-wrinkle-cream') && !seen.has('goodnight wrinkle cream')) {
+      addSub({
+        id: 'sub_cream_71904',
+        productId: 'goodnight-wrinkle-cream',
+        status: 'Active',
+        productName: 'Goodnight Wrinkle Cream',
+        formulaCode: 'Formula #LM-612',
+        strength: 'Squalane 5% + Multi-Weight HA Complex (50ml)',
+        price: 20.40,
+        frequencyDays: 30,
+        nextRefillDate: 'October 16, 2026',
+        image: creamCutoutImg
+      });
+    }
+
+    return list;
+  };
+
+  const getSubscriptionImage = (sub) => {
+    if (sub.image && typeof sub.image === 'string' && (sub.image.startsWith('/') || sub.image.startsWith('data:'))) {
+      return sub.image;
+    }
+    const name = (sub.productName || sub.title || '').toLowerCase();
+    const pid = (sub.productId || sub.id || '').toLowerCase();
+    
+    // Try to find in PRODUCTS data catalog
+    const found = PRODUCTS.find(p => p.id === pid || p.title.toLowerCase() === name || name.includes(p.title.toLowerCase()));
+    if (found && (found.cutoutImage || found.image)) {
+      return found.cutoutImage || found.image;
+    }
+
+    if (name.includes('cream') || pid.includes('cream')) {
+      if (name.includes('rx') || pid.includes('prescription')) return rxCreamCutoutImg;
+      return creamCutoutImg;
+    }
+    if (name.includes('sunscreen') || name.includes('spf') || pid.includes('sunscreen') || pid.includes('spf')) return sunscreenCutoutImg;
+    if (name.includes('cleanser') || pid.includes('cleanser')) return cleanserCutoutImg;
+    return serumCutoutImg;
+  };
+
+  // Subscriptions array state from localStorage
+  const [subscriptionsList, setSubscriptionsList] = useState(() => loadMergedSubscriptions());
+
+  // Track which subscription is targeted for modal actions
+  const [targetSubId, setTargetSubId] = useState(() => subscriptionsList[0]?.id || 'sub_serum_92810');
+  const activeTargetSub = subscriptionsList.find(s => s.id === targetSubId) || subscriptionsList[0];
+
+  // Quick Add Subscription modal state
+  const [isAddSubModalOpen, setIsAddSubModalOpen] = useState(false);
+
+  // Sync latest subscriptions from localStorage on mount/focus
+  useEffect(() => {
+    const handleSync = () => {
+      setSubscriptionsList(loadMergedSubscriptions());
+    };
+    window.addEventListener('storage', handleSync);
+    window.addEventListener('lumiere_subscription_updated', handleSync);
+    return () => {
+      window.removeEventListener('storage', handleSync);
+      window.removeEventListener('lumiere_subscription_updated', handleSync);
+    };
   }, []);
+
+  // Backward compatibility alias for single-subscription references
+  const subscription = activeTargetSub;
 
   // Modal controls
   const [isSnoozeModalOpen, setIsSnoozeModalOpen] = useState(false);
@@ -103,7 +234,7 @@ export default function AccountPortal({
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
 
   // Strength adjustment state
-  const [selectedStrength, setSelectedStrength] = useState(subscription.strength);
+  const [selectedStrength, setSelectedStrength] = useState(subscription?.strength || 'Tretinoin 0.025% + Niacinamide 4%');
   const [strengthDoctorNote, setStrengthDoctorNote] = useState('');
   const [strengthRequested, setStrengthRequested] = useState(false);
 
@@ -172,74 +303,124 @@ export default function AccountPortal({
     showToast('Account details & phone number updated successfully');
   };
 
-  const saveSubscription = (updated) => {
-    setSubscription(updated);
+  const saveSubscriptionsList = (updated) => {
+    setSubscriptionsList(updated);
     try {
-      localStorage.setItem('lumiere_active_subscription', JSON.stringify(updated));
+      localStorage.setItem('lumiere_subscriptions', JSON.stringify(updated));
+      if (updated.length > 0) {
+        localStorage.setItem('lumiere_active_subscription', JSON.stringify(updated[0]));
+      }
     } catch (e) { }
   };
 
-  // Snooze next delivery by 30 days
+  // Snooze next delivery by days for targeted subscription
   const handleSnoozeDelivery = (days = 30) => {
-    // Calculate new date
-    const currentDate = new Date(subscription.nextRefillDate.replace(/(\w+)\s(\d+),\s(\d+)/, '$1 $2, $3'));
+    const sub = activeTargetSub;
+    if (!sub) return;
+    const currentDate = new Date((sub.nextRefillDate || '').replace(/(\w+)\s(\d+),\s(\d+)/, '$1 $2, $3'));
     const validDate = isNaN(currentDate.getTime()) ? new Date() : currentDate;
     validDate.setDate(validDate.getDate() + days);
 
     const options = { month: 'long', day: 'numeric', year: 'numeric' };
     const newDateStr = validDate.toLocaleDateString('en-US', options);
 
-    const updated = {
-      ...subscription,
-      nextRefillDate: newDateStr
-    };
-    saveSubscription(updated);
+    const updated = subscriptionsList.map(s => s.id === sub.id ? { ...s, nextRefillDate: newDateStr } : s);
+    saveSubscriptionsList(updated);
     setIsSnoozeModalOpen(false);
-    showToast(`Refill postponed to ${newDateStr}`);
+    showToast(`${sub.productName} refill postponed to ${newDateStr}`);
   };
 
-  // Change frequency (e.g. 30, 60, 90)
-  const handleChangeFrequency = (days) => {
-    const updated = { ...subscription, frequencyDays: days };
-    saveSubscription(updated);
-    showToast(`Delivery frequency updated to every ${days} days`);
+  // Change frequency (e.g. 30, 60, 90) for specific subscription
+  const handleChangeFrequency = (subId, days) => {
+    const sub = subscriptionsList.find(s => s.id === subId);
+    const updated = subscriptionsList.map(s => s.id === subId ? { ...s, frequencyDays: days } : s);
+    saveSubscriptionsList(updated);
+    showToast(`${sub?.productName || 'Delivery'} cadence updated to every ${days} days`);
   };
 
-  // Submit strength adjustment request to Dr. Jenkins
+  // Submit strength adjustment request
   const handleStrengthSubmit = (e) => {
     e.preventDefault();
     setStrengthRequested(true);
     setTimeout(() => {
-      const updated = { ...subscription, strength: selectedStrength };
-      saveSubscription(updated);
+      const updated = subscriptionsList.map(s => s.id === activeTargetSub.id ? { ...s, strength: selectedStrength } : s);
+      saveSubscriptionsList(updated);
       setIsStrengthModalOpen(false);
       setStrengthRequested(false);
-      showToast('Strength adjustment submitted to Dr. Sarah Jenkins for approval');
+      showToast(`Protocol for ${activeTargetSub.productName} submitted to Dr. Sarah Jenkins for approval`);
     }, 900);
   };
 
-  // Quick add companion to next refill
+  // Pause or cancel subscription
+  const handlePauseOrCancel = (subId, action = 'pause') => {
+    const sub = subscriptionsList.find(s => s.id === subId);
+    if (!sub) return;
+    let updated;
+    if (action === 'cancel') {
+      updated = subscriptionsList.filter(s => s.id !== subId);
+      showToast(`${sub.productName} auto-ship cancelled`);
+    } else {
+      const nextStatus = sub.status === 'Paused' ? 'Active' : 'Paused';
+      updated = subscriptionsList.map(s => s.id === subId ? { ...s, status: nextStatus } : s);
+      showToast(`${sub.productName} is now ${nextStatus.toLowerCase()}`);
+    }
+    saveSubscriptionsList(updated);
+    setIsPauseModalOpen(false);
+  };
+
+  // Add any product directly as an active subscription to the regimen
   const handleAddCompanionToRefill = (product) => {
-    const exists = subscription.companionAddons?.some(p => p.id === product.id);
-    if (exists) {
-      showToast(`${product.title} is already added to your next shipment`);
+    const prodTitle = product.title || product.productName || 'Clinical Formulation';
+    const prodId = product.id || product.productId || ('sub_' + Math.random().toString(36).substring(2, 8));
+
+    const alreadySubbed = subscriptionsList.some(s => 
+      s.productId === prodId || 
+      s.productName?.toLowerCase() === prodTitle.toLowerCase()
+    );
+    if (alreadySubbed) {
+      showToast(`${prodTitle} is already active in your subscriptions!`);
       return;
     }
-    const updated = {
-      ...subscription,
-      companionAddons: [...(subscription.companionAddons || []), product]
+
+    const catalogItem = PRODUCTS.find(p => p.id === prodId || p.title?.toLowerCase() === prodTitle.toLowerCase());
+    const nextDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const formattedDate = nextDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    const finalPrice = Math.round((Number(product.price || catalogItem?.basePrice || 24) * 0.85) * 100) / 100;
+
+    const isCream = prodTitle.toLowerCase().includes('cream');
+    const isRx = prodTitle.toLowerCase().includes('rx') || prodTitle.toLowerCase().includes('prescription');
+    const isSPF = prodTitle.toLowerCase().includes('sunscreen') || prodTitle.toLowerCase().includes('spf');
+    const isCleanser = prodTitle.toLowerCase().includes('cleanser');
+
+    const fallbackImg = isRx ? rxCreamCutoutImg 
+      : (isCream ? creamCutoutImg 
+      : (isSPF ? sunscreenCutoutImg 
+      : (isCleanser ? cleanserCutoutImg : serumCutoutImg)));
+
+    const newSub = {
+      id: 'sub_' + Math.random().toString(36).substring(2, 9),
+      productId: prodId,
+      status: 'Active',
+      productName: prodTitle,
+      formulaCode: catalogItem?.activeFormula ? `Formula #${(catalogItem.id || 'LM01').substring(0, 4).toUpperCase()}` : ('Formula #LM-' + Math.floor(100 + Math.random() * 900)),
+      strength: catalogItem?.activeFormula || product.strength || (isSPF ? 'Zinc Oxide 12% + Niacinamide 2%' : 'Active Dermatological Protocol'),
+      price: finalPrice,
+      frequencyDays: 30,
+      nextRefillDate: formattedDate,
+      image: catalogItem?.cutoutImage || catalogItem?.image || product.image || fallbackImg,
+      description: catalogItem?.description || product.desc || 'Dermatologist-formulated routine companion to synergize with your daily skincare protocol.',
+      companionAddons: []
     };
-    saveSubscription(updated);
-    showToast(`Added ${product.title} to your next shipment (+$${product.price})`);
+
+    const updated = [...subscriptionsList, newSub];
+    saveSubscriptionsList(updated);
+    showToast(`Subscribed! ${prodTitle} added to your Active Regimen ($${finalPrice.toFixed(2)}/refill).`);
   };
 
   const handleRemoveCompanion = (productId) => {
-    const updated = {
-      ...subscription,
-      companionAddons: subscription.companionAddons.filter(p => p.id !== productId)
-    };
-    saveSubscription(updated);
-    showToast('Removed companion add-on from next shipment');
+    const updated = subscriptionsList.filter(s => s.id !== productId && s.productId !== productId);
+    saveSubscriptionsList(updated);
+    showToast('Removed formulation from active regimen');
   };
 
   // If not logged in, show luxury auth gateway
@@ -371,96 +552,127 @@ export default function AccountPortal({
                 </p>
               </div>
 
-              <div className="panel-header-badges">
+              <div className="panel-header-badges" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <button
+                  type="button"
+                  className="hims-btn-black"
+                  style={{ padding: '8px 18px', fontSize: '0.82rem', display: 'inline-flex', alignItems: 'center', gap: '6px', borderRadius: '9999px', cursor: 'pointer' }}
+                  onClick={() => setIsAddSubModalOpen(true)}
+                  id="add-product-to-regimen-btn"
+                >
+                  <Plus size={15} />
+                  <span>+ Subscribe New Product</span>
+                </button>
                 <span className="refill-counter-badge">
                   <Calendar size={14} />
-                  <span>Next Refill: <strong>{subscription.nextRefillDate}</strong></span>
+                  <span>Next Refill: <strong>{activeTargetSub?.nextRefillDate || 'October 16, 2026'}</strong></span>
                 </span>
               </div>
             </div>
 
-            {/* Primary Subscription Card */}
-            <div className="hims-sub-card">
-              <div className="hims-sub-card-left">
-                <div className="hims-sub-img-wrap">
-                  <img src={serumCutoutImg} alt={subscription.productName} className="product-cutout-img" />
-                </div>
-              </div>
+            {/* List of All Active Subscriptions */}
+            <div className="hims-subs-list" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              {subscriptionsList.map((sub) => {
+                const subImg = getSubscriptionImage(sub);
+                return (
+                  <div key={sub.id} className="hims-sub-card">
+                    <div className="hims-sub-card-left">
+                      <div className="hims-sub-img-wrap">
+                        <img src={subImg} alt={sub.productName} className="product-cutout-img" />
+                      </div>
+                    </div>
 
-              <div className="hims-sub-card-center">
-                <div className="hims-sub-badge-row">
-                  <span className="hims-rx-tag">{subscription.formulaCode}</span>
-                  <span className="hims-status-tag active">Status: {subscription.status}</span>
-                </div>
-                <h3 className="hims-sub-title">{subscription.productName}</h3>
-                <div className="hims-sub-formula-spec">
-                  <strong>ACTIVE DOSAGE:</strong> {subscription.strength}
-                </div>
-                <p className="hims-sub-explanation">
-                  Formulated to target fine lines, cellular density, and micro-texture. Formulated fresh in California 48 hours prior to delivery.
-                </p>
+                    <div className="hims-sub-card-center">
+                      <div className="hims-sub-badge-row">
+                        <span className="hims-rx-tag">{sub.formulaCode || 'Formula #LM-924'}</span>
+                        <span className={`hims-status-tag ${sub.status === 'Active' ? 'active' : 'paused'}`}>
+                          Status: {sub.status}
+                        </span>
+                      </div>
+                      <h3 className="hims-sub-title">{sub.productName}</h3>
+                      <div className="hims-sub-formula-spec">
+                        <strong>ACTIVE DOSAGE:</strong> {sub.strength || 'Dermatologist Custom Protocol'}
+                      </div>
+                      <p className="hims-sub-explanation">
+                        {sub.description || (sub.productName.toLowerCase().includes('cream')
+                          ? 'Ultra-nourishing overnight moisture barrier shield that locks in active retinoids and restores dermal lipid balance.'
+                          : 'Formulated to target fine lines, cellular density, and micro-texture. Formulated fresh in California 48 hours prior to delivery.')}
+                      </p>
 
-                <div className="hims-sub-meta-row">
-                  <div className="sub-meta-item">
-                    <span className="meta-label">Schedule:</span>
-                    <span className="meta-value">Every {subscription.frequencyDays} Days</span>
-                  </div>
-                  <div className="sub-meta-item">
-                    <span className="meta-label">Price:</span>
-                    <span className="meta-value">${subscription.price} / refill</span>
-                  </div>
-                  <div className="sub-meta-item">
-                    <span className="meta-label">Shipping:</span>
-                    <span className="meta-value">Free 2-Day Air</span>
-                  </div>
-                </div>
-              </div>
+                      <div className="hims-sub-meta-row">
+                        <div className="sub-meta-item">
+                          <span className="meta-label">Schedule:</span>
+                          <span className="meta-value">Every {sub.frequencyDays || 30} Days</span>
+                        </div>
+                        <div className="sub-meta-item">
+                          <span className="meta-label">Price:</span>
+                          <span className="meta-value">${sub.price} / refill</span>
+                        </div>
+                        <div className="sub-meta-item">
+                          <span className="meta-label">Shipping:</span>
+                          <span className="meta-value">Free 2-Day Air</span>
+                        </div>
+                      </div>
+                    </div>
 
-              <div className="hims-sub-card-right">
-                <div className="sub-actions-box">
-                  <button
-                    type="button"
-                    className="hims-btn-black sub-action-btn"
-                    onClick={() => setIsSnoozeModalOpen(true)}
-                  >
-                    <Clock size={16} />
-                    <span>Delay / Snooze (+30 Days)</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className="hims-btn-outline sub-action-btn"
-                    onClick={() => setIsStrengthModalOpen(true)}
-                  >
-                    <Sliders size={16} />
-                    <span>Adjust Active Strength</span>
-                  </button>
-
-                  <div className="frequency-toggle-wrapper">
-                    <span className="freq-label">Refill Frequency:</span>
-                    <div className="freq-pill-group">
-                      {[30, 60, 90].map((days) => (
+                    <div className="hims-sub-card-right">
+                      <div className="sub-actions-box">
                         <button
-                          key={days}
                           type="button"
-                          className={`freq-pill ${subscription.frequencyDays === days ? 'active' : ''}`}
-                          onClick={() => handleChangeFrequency(days)}
+                          className="hims-btn-black sub-action-btn"
+                          onClick={() => {
+                            setTargetSubId(sub.id);
+                            setIsSnoozeModalOpen(true);
+                          }}
                         >
-                          {days}d
+                          <Clock size={16} />
+                          <span>Delay / Snooze (+30 Days)</span>
                         </button>
-                      ))}
+
+                        <button
+                          type="button"
+                          className="hims-btn-outline sub-action-btn"
+                          onClick={() => {
+                            setTargetSubId(sub.id);
+                            setSelectedStrength(sub.strength || '');
+                            setIsStrengthModalOpen(true);
+                          }}
+                        >
+                          <Sliders size={16} />
+                          <span>Adjust Active Strength</span>
+                        </button>
+
+                        <div className="frequency-toggle-wrapper">
+                          <span className="freq-label">Refill Frequency:</span>
+                          <div className="freq-pill-group">
+                            {[30, 60, 90].map((days) => (
+                              <button
+                                key={days}
+                                type="button"
+                                className={`freq-pill ${(sub.frequencyDays || 30) === days ? 'active' : ''}`}
+                                onClick={() => handleChangeFrequency(sub.id, days)}
+                              >
+                                {days}d
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          className="sub-secondary-link"
+                          onClick={() => {
+                            setTargetSubId(sub.id);
+                            setIsPauseModalOpen(true);
+                          }}
+                        >
+                          {sub.status === 'Paused' ? 'Resume Subscription' : 'Manage / Pause Subscription'}
+                        </button>
+                      </div>
                     </div>
                   </div>
-
-                  <button
-                    type="button"
-                    className="sub-secondary-link"
-                    onClick={() => setIsPauseModalOpen(true)}
-                  >
-                    Manage / Pause Subscription
-                  </button>
-                </div>
-              </div>
+                );
+              })}
             </div>
 
             {/* Companion Products Section */}
@@ -468,79 +680,100 @@ export default function AccountPortal({
               <div className="addons-header">
                 <h4 className="addons-title">Clinical Routine Companions</h4>
                 <p className="addons-sub">
-                  Dermatologist-recommended formulations that synergize with your prescription tretinoin to maximize dermal barrier health.
+                  Dermatologist-recommended formulations that synergize with your prescription tretinoin to maximize dermal barrier health. Click any item to add it to your active refill shipments at 15% discount.
                 </p>
               </div>
 
               <div className="addons-cards-grid">
-                {/* Companion 1 */}
-                <div className="addon-card">
-                  <div className="addon-img-wrap">
-                    <img src={creamCutoutImg} alt="Goodnight Wrinkle Cream" className="product-cutout-img" />
-                  </div>
-                  <div className="addon-info">
-                    <span className="addon-tag">Moisture Barrier Shield</span>
-                    <h5 className="addon-name">Goodnight Wrinkle Cream</h5>
-                    <p className="addon-desc">Deeply conditions the stratum corneum with squalane and multi-weight hyaluronic acid.</p>
-                    <div className="addon-price-row">
-                      <span className="addon-price">$24</span>
-                      <button
-                        type="button"
-                        className="addon-add-btn"
-                        onClick={() => handleAddCompanion('Goodnight Wrinkle Cream', 24)}
-                      >
-                        <Plus size={14} />
-                        <span>Add to Next Box</span>
-                      </button>
+                {/* Companion 1: Goodnight Wrinkle Cream */}
+                {(() => {
+                  const isCreamActive = subscriptionsList.some(s => s.productName?.toLowerCase().includes('wrinkle cream') || s.productId?.includes('goodnight-wrinkle-cream'));
+                  return (
+                    <div className="addon-product-card">
+                      <div className="addon-img-box">
+                        <img src={creamCutoutImg} alt="Goodnight Wrinkle Cream" className="product-cutout-img" />
+                      </div>
+                      <div className="addon-info">
+                        <span className="addon-step-label">Moisture Barrier Shield</span>
+                        <h5 className="addon-prod-title">Goodnight Wrinkle Cream</h5>
+                        <p className="addon-prod-desc">Deeply conditions the stratum corneum with squalane and multi-weight hyaluronic acid.</p>
+                        <div className="addon-bottom-row">
+                          <span className="addon-price">$20.40 <span style={{ textDecoration: 'line-through', fontSize: '0.75rem', color: '#8c827a' }}>$24</span></span>
+                          <button
+                            type="button"
+                            className="addon-add-btn"
+                            disabled={isCreamActive}
+                            onClick={() => handleAddCompanionToRefill({ id: 'goodnight-wrinkle-cream', title: 'Goodnight Wrinkle Cream', price: 24, image: creamCutoutImg })}
+                            style={isCreamActive ? { background: '#f5f0eb', color: '#065f46', border: '1px solid #cce3de', cursor: 'default' } : {}}
+                          >
+                            {isCreamActive ? <Check size={14} /> : <Plus size={14} />}
+                            <span>{isCreamActive ? 'Active in Regimen' : 'Add to Next Box'}</span>
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  );
+                })()}
 
-                {/* Companion 2 */}
-                <div className="addon-card">
-                  <div className="addon-img-wrap">
-                    <img src={sunscreenCutoutImg} alt="Daily Mineral Defense SPF 30" className="product-cutout-img" />
-                  </div>
-                  <div className="addon-info">
-                    <span className="addon-tag">Broad Spectrum Defense</span>
-                    <h5 className="addon-name">Daily Mineral SPF 30</h5>
-                    <p className="addon-desc">Invisible mineral protection that guards newly surfaced retinoid-treated cells against UV photoaging.</p>
-                    <div className="addon-price-row">
-                      <span className="addon-price">$26</span>
-                      <button
-                        type="button"
-                        className="addon-add-btn"
-                        onClick={() => handleAddCompanion('Daily Mineral SPF 30', 26)}
-                      >
-                        <Plus size={14} />
-                        <span>Add to Next Box</span>
-                      </button>
+                {/* Companion 2: Daily Mineral SPF 30 */}
+                {(() => {
+                  const isSpfActive = subscriptionsList.some(s => s.productName?.toLowerCase().includes('spf') || s.productId?.includes('sunscreen') || s.productId?.includes('spf'));
+                  return (
+                    <div className="addon-product-card">
+                      <div className="addon-img-box">
+                        <img src={sunscreenCutoutImg} alt="Daily Mineral Defense SPF 30" className="product-cutout-img" />
+                      </div>
+                      <div className="addon-info">
+                        <span className="addon-step-label">Broad Spectrum Defense</span>
+                        <h5 className="addon-prod-title">Daily Mineral SPF 30</h5>
+                        <p className="addon-prod-desc">Invisible mineral protection that guards newly surfaced retinoid-treated cells against UV photoaging.</p>
+                        <div className="addon-bottom-row">
+                          <span className="addon-price">$22.10 <span style={{ textDecoration: 'line-through', fontSize: '0.75rem', color: '#8c827a' }}>$26</span></span>
+                          <button
+                            type="button"
+                            className="addon-add-btn"
+                            disabled={isSpfActive}
+                            onClick={() => handleAddCompanionToRefill({ id: 'daily-mineral-defense-spf-30', title: 'Daily Mineral SPF 30', price: 26, image: sunscreenCutoutImg })}
+                            style={isSpfActive ? { background: '#f5f0eb', color: '#065f46', border: '1px solid #cce3de', cursor: 'default' } : {}}
+                          >
+                            {isSpfActive ? <Check size={14} /> : <Plus size={14} />}
+                            <span>{isSpfActive ? 'Active in Regimen' : 'Add to Next Box'}</span>
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  );
+                })()}
 
-                {/* Companion 3 */}
-                <div className="addon-card">
-                  <div className="addon-img-wrap">
-                    <img src={cleanserCutoutImg} alt="High Tide Squalane Cleanser" className="product-cutout-img" />
-                  </div>
-                  <div className="addon-info">
-                    <span className="addon-tag">Lipid-Preserving Cleanse</span>
-                    <h5 className="addon-name">High Tide Squalane Cleanser</h5>
-                    <p className="addon-desc">Gentle amino acid wash that rinses surface impurities without compromising natural sebum lipids.</p>
-                    <div className="addon-price-row">
-                      <span className="addon-price">$22</span>
-                      <button
-                        type="button"
-                        className="addon-add-btn"
-                        onClick={() => handleAddCompanion('High Tide Squalane Cleanser', 22)}
-                      >
-                        <Plus size={14} />
-                        <span>Add to Next Box</span>
-                      </button>
+                {/* Companion 3: High Tide Squalane Cleanser */}
+                {(() => {
+                  const isCleanserActive = subscriptionsList.some(s => s.productName?.toLowerCase().includes('cleanser') || s.productId?.includes('cleanser'));
+                  return (
+                    <div className="addon-product-card">
+                      <div className="addon-img-box">
+                        <img src={cleanserCutoutImg} alt="High Tide Squalane Cleanser" className="product-cutout-img" />
+                      </div>
+                      <div className="addon-info">
+                        <span className="addon-step-label">Lipid-Preserving Cleanse</span>
+                        <h5 className="addon-prod-title">High Tide Squalane Cleanser</h5>
+                        <p className="addon-prod-desc">Gentle amino acid wash that rinses surface impurities without compromising natural sebum lipids.</p>
+                        <div className="addon-bottom-row">
+                          <span className="addon-price">$18.70 <span style={{ textDecoration: 'line-through', fontSize: '0.75rem', color: '#8c827a' }}>$22</span></span>
+                          <button
+                            type="button"
+                            className="addon-add-btn"
+                            disabled={isCleanserActive}
+                            onClick={() => handleAddCompanionToRefill({ id: 'gentle-cream-cleanser', title: 'High Tide Squalane Cleanser', price: 22, image: cleanserCutoutImg })}
+                            style={isCleanserActive ? { background: '#f5f0eb', color: '#065f46', border: '1px solid #cce3de', cursor: 'default' } : {}}
+                          >
+                            {isCleanserActive ? <Check size={14} /> : <Plus size={14} />}
+                            <span>{isCleanserActive ? 'Active in Regimen' : 'Add to Next Box'}</span>
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  );
+                })()}
               </div>
             </div>
           </div>
@@ -1188,12 +1421,7 @@ export default function AccountPortal({
                   type="button"
                   className="hims-link-danger"
                   style={{ textAlign: 'center', display: 'block', margin: '18px auto 0' }}
-                  onClick={() => {
-                    const updated = { ...subscription, status: 'Paused' };
-                    saveSubscription(updated);
-                    setIsPauseModalOpen(false);
-                    showToast('Subscription safely paused. Reactivate anytime.');
-                  }}
+                  onClick={() => handlePauseOrCancel(activeTargetSub.id, 'cancel')}
                 >
                   Cancel auto-delivery completely
                 </button>
@@ -1290,6 +1518,116 @@ export default function AccountPortal({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 5: ADD NEW FORMULATION TO REGIMEN */}
+      {isAddSubModalOpen && (
+        <div className="hims-account-modal-overlay" role="dialog" aria-modal="true">
+          <div className="hims-account-modal-card animate-fade-in" style={{ maxWidth: '640px', width: '92%' }}>
+            <div className="modal-header">
+              <div>
+                <h3 className="modal-title">Subscribe Formulation to Regimen</h3>
+                <p style={{ fontSize: '0.8rem', color: '#78716c', margin: '4px 0 0 0' }}>
+                  Auto-ships every 30 days with member 15% discount and Free 2-Day Air.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="modal-close-btn"
+                onClick={() => setIsAddSubModalOpen(false)}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="modal-body" style={{ maxHeight: '60vh', overflowY: 'auto', padding: '16px 24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {PRODUCTS.map((prod) => {
+                const isSubbed = subscriptionsList.some(s => 
+                  s.productId === prod.id || 
+                  s.productName?.toLowerCase() === prod.title?.toLowerCase()
+                );
+                const subPrice = Math.round(prod.basePrice * 0.85 * 100) / 100;
+                const prodImg = prod.cutoutImage || prod.image;
+
+                return (
+                  <div
+                    key={prod.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '16px',
+                      padding: '14px',
+                      border: '1px solid #e7e0d6',
+                      borderRadius: '14px',
+                      background: isSubbed ? '#faf8f5' : '#ffffff',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <div style={{ width: '56px', height: '56px', background: '#F9F6F0', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px', flexShrink: 0 }}>
+                      <img src={prodImg} alt={prod.title} style={{ maxWidth: '90%', maxHeight: '90%', objectFit: 'contain' }} />
+                    </div>
+
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#111111' }}>{prod.title}</h4>
+                        <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#8C6D53', background: '#F3ECE2', padding: '2px 8px', borderRadius: '9999px' }}>
+                          {prod.category || 'Skincare'}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '0.74rem', color: '#665f57', marginTop: '3px', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                        {prod.activeFormula || prod.desc || prod.subtitle || 'Dermatologist formulation'}
+                      </div>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#065f46', marginTop: '4px' }}>
+                        ${subPrice.toFixed(2)}/refill <span style={{ textDecoration: 'line-through', color: '#a8a29e', fontSize: '0.74rem', fontWeight: 400 }}>${prod.basePrice}</span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={isSubbed}
+                      onClick={() => {
+                        handleAddCompanionToRefill({
+                          id: prod.id,
+                          productId: prod.id,
+                          title: prod.title,
+                          price: prod.basePrice,
+                          image: prodImg
+                        });
+                        setIsAddSubModalOpen(false);
+                      }}
+                      style={{
+                        padding: '8px 16px',
+                        borderRadius: '9999px',
+                        border: isSubbed ? '1px solid #dcd5cc' : 'none',
+                        background: isSubbed ? '#f5f0eb' : '#111111',
+                        color: isSubbed ? '#8c827a' : '#ffffff',
+                        fontSize: '0.78rem',
+                        fontWeight: 700,
+                        cursor: isSubbed ? 'default' : 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        flexShrink: 0
+                      }}
+                    >
+                      {isSubbed ? (
+                        <>
+                          <Check size={14} />
+                          <span>Active</span>
+                        </>
+                      ) : (
+                        <>
+                          <Plus size={14} />
+                          <span>Subscribe</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}

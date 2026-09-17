@@ -1,7 +1,6 @@
 import React from 'react';
 import { X, Trash2, ShieldCheck, ArrowRight, Sparkles, Lock, RefreshCw } from 'lucide-react';
 import { PRODUCTS } from '../data/products';
-import AppleIcon from './AppleIcon';
 
 export default function CartDrawer({
   isOpen,
@@ -228,18 +227,6 @@ export default function CartDrawer({
               <span>Checkout • ${subtotal.toFixed(2)}</span>
               <ArrowRight size={16} />
             </button>
-
-            {/* Subtle payment acceptance indicators */}
-            <div className="cart-payment-methods-strip">
-              <span className="accepted-label">Accepted:</span>
-              <span className="method-pill-mini apple-pill">
-                <AppleIcon size={12} />
-                <span>Pay</span>
-              </span>
-              <span className="method-pill-mini">Shop Pay</span>
-              <span className="method-pill-mini">Visa</span>
-              <span className="method-pill-mini">Mastercard</span>
-            </div>
           </div>
         )}
       </div>
